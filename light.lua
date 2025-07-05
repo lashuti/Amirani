@@ -16,8 +16,9 @@ function Light.enable()
     function Light:draw()
         if not self.enabled then return end
 
-        -- Draw a black overlay on a canvas
-        if not self._canvas then
+        -- Draw a black overlay in screen coordinates (not affected by camera)
+        love.graphics.origin() -- Reset transforms so overlay is always screen-aligned
+        if not self._canvas or self._canvas:getWidth() ~= love.graphics.getWidth() or self._canvas:getHeight() ~= love.graphics.getHeight() then
             self._canvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
         end
         self._canvas:renderTo(function()
@@ -33,7 +34,7 @@ function Light.enable()
             end
             love.graphics.setBlendMode("alpha")
         end)
-        -- Draw the canvas over the scene
+        -- Draw the canvas over the scene, always at (0,0) in screen space
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.setBlendMode("alpha")
         love.graphics.draw(self._canvas, 0, 0)

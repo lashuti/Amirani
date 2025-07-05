@@ -1,7 +1,9 @@
 local Dog = require "dog"
 local Light = require "light"
 local Menu = require "menu"
+local Camera = require "camera"
 local select_menu = require "select_menu"
+local levelManager = require "levelManager"
 
 GameState = {
   MENU = "menu",
@@ -39,6 +41,7 @@ function love.update(dt)
     Dog:update(dt)
     Light:update(dt)
     select_menu.update(dt)
+    levelManager.CheckCameraMoveTriggers()
   end
 end
 
@@ -51,13 +54,19 @@ function love.draw()
       love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8)
     end
 
-    -- Draw select_menu at the bottom (always visible in GAME)
-    select_menu.draw()
-
-    -- Draw game elements on top
+    Camera:attach()
     Dog:draw()
     Light:draw()
+    Camera:detach()
+
+    -- Draw select_menu at the bottom (always visible in GAME)
+    select_menu.draw()
   end
+
+    if(DEBUG_MODE) then
+      local mx, my = love.mouse.getPosition()
+      love.graphics.print("X:" .. mx .. " Y:" .. my, 10, 10)
+    end
 end
 
 function love.keypressed(key)
