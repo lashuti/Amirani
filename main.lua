@@ -5,6 +5,7 @@ local Menu = require "menu"
 local Camera = require "camera"
 local select_menu = require "select_menu"
 local levelManager = require "levelManager"
+local SoundManager = require "sound_manager"
 
 GameState = {
   MENU = "menu",
@@ -34,6 +35,13 @@ function love.load()
   Light:load()
   LightWorldManager:load()
   select_menu.load(WIDTH, HEIGHT)
+  
+  -- Load sounds and make globally accessible
+  SoundManager:load()
+  _G.SoundManager = SoundManager
+  
+  -- Start default ambiance
+  SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
 end
 
 function love.update(dt)
