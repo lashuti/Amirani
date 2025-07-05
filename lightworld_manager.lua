@@ -1,4 +1,4 @@
-local LightWorld = require "lib.lighting"
+local LightWorld = require "lighting"
 
 local LightWorldManager = {}
 LightWorldManager.enabled = false
