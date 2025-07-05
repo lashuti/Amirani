@@ -15,13 +15,19 @@ function waterBottle.new(x, y)
         prevMouseY = nil,
         isDragging = false,
         waterMomentum = 0,
-        waterAngle = 0
+        waterAngle = 0,
+        shakeHistory = {},
+        maxShakeHistory = 10,
+        spillThreshold = 400,
+        droplets = {}
     }
     
     self.update = waterBottle.update
     self.draw = waterBottle.draw
     self.startDrag = waterBottle.startDrag
     self.stopDrag = waterBottle.stopDrag
+    self.spill = waterBottle.spill
+    self.getDroplets = waterBottle.getDroplets
     
     return self
 end
@@ -36,6 +42,25 @@ function waterBottle:update(dt)
             
             self.velocityX = self.velocityX * 0.7 + newVelX * 0.3
             self.velocityY = self.velocityY * 0.7 + newVelY * 0.3
+            
+            -- Track shake history
+            local velocity = math.sqrt(self.velocityX^2 + self.velocityY^2)
+            table.insert(self.shakeHistory, velocity)
+            if #self.shakeHistory > self.maxShakeHistory then
+                table.remove(self.shakeHistory, 1)
+            end
+            
+            -- Calculate average shake
+            local avgShake = 0
+            for _, v in ipairs(self.shakeHistory) do
+                avgShake = avgShake + v
+            end
+            avgShake = avgShake / #self.shakeHistory
+            
+            -- Spill water if shaking too much
+            if avgShake > self.spillThreshold and self.waterLevel > 0 then
+                self:spill()
+            end
             
             local targetRotation = math.atan2(self.velocityX, -self.velocityY) * 0.2
             targetRotation = math.max(-math.pi/3, math.min(math.pi/3, targetRotation))
@@ -57,6 +82,20 @@ function waterBottle:update(dt)
     local angleDiff = targetAngle - self.waterAngle
     self.waterMomentum = self.waterMomentum * 0.9 + angleDiff * 3
     self.waterAngle = self.waterAngle + self.waterMomentum * dt
+    
+    -- Update droplets
+    for i = #self.droplets, 1, -1 do
+        local d = self.droplets[i]
+        d.vx = d.vx * (1 - dt * 0.5)
+        d.x = d.x + d.vx * dt
+        d.y = d.y + d.vy * dt
+        d.vy = d.vy + 600 * dt
+        d.life = d.life - dt * 0.8
+        
+        if d.life <= 0 or d.y > 1000 then
+            table.remove(self.droplets, i)
+        end
+    end
 end
 
 function waterBottle:startDrag()
@@ -68,6 +107,33 @@ end
 
 function waterBottle:stopDrag()
     self.isDragging = false
+end
+
+function waterBottle:spill()
+    local spillAmount = math.min(5, self.waterLevel)
+    self.waterLevel = self.waterLevel - spillAmount
+    
+    for i = 1, math.floor(spillAmount * 2) do
+        local angleVariation = (math.random() - 0.5) * 0.8
+        local angle = self.rotation + angleVariation
+        local speed = 80 + math.random() * 120
+        local offsetX = math.sin(angle) * 15
+        local offsetY = 25
+        
+        table.insert(self.droplets, {
+            x = self.x + offsetX,
+            y = self.y + offsetY,
+            vx = math.sin(angle) * speed + self.velocityX * 0.4,
+            vy = math.cos(angle) * speed * 0.5 + 50,
+            life = 1.5 + math.random() * 0.5,
+            size = 3 + math.random() * 3,
+            id = math.random() -- Unique ID for collision tracking
+        })
+    end
+end
+
+function waterBottle:getDroplets()
+    return self.droplets
 end
 
 
@@ -144,6 +210,42 @@ function waterBottle:draw()
     love.graphics.rectangle("line", -self.width/2 + 5, -self.height/2 - 5, self.width - 10, 10, 3)
     
     love.graphics.pop()
+    
+    -- Draw water droplets
+    for _, d in ipairs(self.droplets) do
+        local alpha = (d.life / 2) ^ 0.8
+        love.graphics.push()
+        love.graphics.translate(d.x, d.y)
+        
+        -- Droplet glow
+        love.graphics.setColor(0.4, 0.7, 1, alpha * 0.3)
+        love.graphics.circle("fill", 0, 0, d.size * 1.5)
+        
+        -- Main droplet
+        love.graphics.setColor(0.3, 0.6, 1, alpha)
+        love.graphics.circle("fill", 0, 0, d.size)
+        
+        -- Highlight
+        love.graphics.setColor(0.6, 0.8, 1, alpha * 0.7)
+        love.graphics.circle("fill", -d.size * 0.3, -d.size * 0.3, d.size * 0.4)
+        
+        love.graphics.pop()
+    end
+    
+    -- Show spill indicator when shaking
+    if self.isDragging and #self.shakeHistory > 0 then
+        local avgShake = 0
+        for _, v in ipairs(self.shakeHistory) do
+            avgShake = avgShake + v
+        end
+        avgShake = avgShake / #self.shakeHistory
+        
+        if avgShake > self.spillThreshold * 0.7 then
+            local warningAlpha = (avgShake - self.spillThreshold * 0.7) / (self.spillThreshold * 0.3)
+            love.graphics.setColor(1, 0.3, 0.3, warningAlpha * 0.5)
+            love.graphics.print("Careful!", self.x - 25, self.y - self.height/2 - 25)
+        end
+    end
 end
 
 return waterBottle
