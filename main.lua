@@ -1,5 +1,6 @@
 local Dog = require "dog"
 local Light = require "light"
+local LightWorldManager = require "lightworld_manager"
 local Menu = require "menu"
 local Camera = require "camera"
 local select_menu = require "select_menu"
@@ -31,6 +32,7 @@ function love.load()
 
   Dog:load()
   Light:load()
+  LightWorldManager:load()
   select_menu.load(WIDTH, HEIGHT)
 end
 
@@ -40,6 +42,7 @@ function love.update(dt)
   elseif CurrentState == GameState.GAME then
     Dog:update(dt)
     Light:update(dt)
+    LightWorldManager:update(dt)
     select_menu.update(dt)
     levelManager.CheckCameraMoveTriggers()
   end
@@ -49,23 +52,28 @@ function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
-    Camera:attach()
-    if BackgroundImage then
-      love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8)
-    end
+    -- Draw everything with light_world
+    LightWorldManager:draw(function()
+      Camera:attach()
+      if BackgroundImage then
+        love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8)
+      end
 
-    Dog:draw()
+      Dog:draw()
+
+      -- Test red rectangle to see movement of the map
+      local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
+      local rectW, rectH = 100, 60
+      love.graphics.setColor(1, 0, 0, 0.7)
+      love.graphics.rectangle("fill", (screenW - rectW) / 2, (screenH - rectH) / 2, rectW, rectH)
+      love.graphics.setColor(1, 1, 1, 1)
+      --
+
+      Camera:detach()
+    end)
+    
+    -- Draw the old light overlay if enabled (on top of light world)
     Light:draw()
-
-    -- Test red rectangle to see movement of the map
-    local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
-    local rectW, rectH = 100, 60
-    love.graphics.setColor(1, 0, 0, 0.7)
-    love.graphics.rectangle("fill", (screenW - rectW) / 2, (screenH - rectH) / 2, rectW, rectH)
-    love.graphics.setColor(1, 1, 1, 1)
-    --
-
-    Camera:detach()
 
     -- Draw select_menu at the bottom (always visible in GAME)
     select_menu.draw()
@@ -79,7 +87,8 @@ end
 
 function love.keypressed(key)
   if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
-    Light:keypressed(key)
+    -- Light:keypressed(key)  -- Comment out old light system
+    LightWorldManager:keypressed(key)  -- Use light_world instead
   end
 end
 
