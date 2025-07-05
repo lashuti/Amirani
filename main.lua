@@ -2,6 +2,9 @@ local Dog = require "dog"
 local Light = require "light"
 local Menu = require "menu"
 
+local sti = require "libs/sti"
+--local mapLevelOne = sti("maps/levelOne.lua")
+
 GameState = {
   MENU = "menu",
   GAME = "game",
@@ -17,7 +20,7 @@ function love.load()
   love.window.setMode(WIDTH, HEIGHT)
   love.window.setTitle("Amirani")
 
-  backgroundImage = love.graphics.newImage("assets/backgroundTemp.jpg")
+  BackgroundImage = love.graphics.newImage("assets/backgroundTemp.jpg")
   -- Set the random seed
   math.randomseed(os.time())
 
@@ -38,7 +41,7 @@ function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
-    love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8) --0.8x scale temp
+    love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8) --0.8x scale temp
     Dog:draw()
     Light:draw()
   end
