@@ -36,6 +36,14 @@ local placedItems = {}
 local waterBottles = {}
 local activeBottle = nil
 
+-- Snap areas (grey rectangles)
+local snapAreas = {
+    {x = 180, y = 200, w = 100, h = 100},
+    {x = 400, y = 200, w = 100, h = 100},
+    {x = 620, y = 200, w = 100, h = 100},
+}
+local snapHighlightIndex = nil
+
 function select_menu.load(sw, sh)
 	config.screenWidth = sw or config.screenWidth
 	config.screenHeight = sh or config.screenHeight
@@ -112,7 +120,7 @@ function select_menu.draw()
 			love.graphics.setColor(config.colorItemDragging)
 			love.graphics.rectangle("fill", item.x, item.y, item.w, item.h, 10, 10)
 			love.graphics.setColor(config.textColorDim)
-			love.graphics.printf(item.label, item.x, item.y + item.h / 2 - 6, item.w, "center")
+			-- No index for menu, only for snap areas
 		else
 			local mx, my = love.mouse.getPosition()
 			local isHovered = mx >= item.x and mx <= item.x + item.w and my >= item.y and my <= item.y + item.h
@@ -144,12 +152,37 @@ function select_menu.draw()
 				love.graphics.rectangle("fill", -10, -5, 20, 20, 3)
 				
 				love.graphics.pop()
-			else
-				love.graphics.setColor(config.textColor)
-				love.graphics.printf(item.label, item.x, item.y + item.h / 2 - 6, item.w, "center")
 			end
 		end
 	end
+
+	-- Draw snap areas
+    for i, area in ipairs(snapAreas) do
+        if snapHighlightIndex == i then
+            love.graphics.setColor(0.2, 0.8, 0.2, 0.5) -- green highlight
+            love.graphics.setLineWidth(5)
+            love.graphics.rectangle("line", area.x, area.y, area.w, area.h, 12, 12)
+        else
+            love.graphics.setColor(0.5, 0.5, 0.5, 0.18)
+            love.graphics.rectangle("fill", area.x, area.y, area.w, area.h, 12, 12)
+            love.graphics.setColor(0.5, 0.5, 0.5, 0.4)
+            love.graphics.setLineWidth(2)
+            love.graphics.rectangle("line", area.x, area.y, area.w, area.h, 12, 12)
+        end
+        -- Draw index number in the center of empty snap area
+        local isOccupied = false
+        for _, item in ipairs(placedItems) do
+            if item.x == area.x and item.y == area.y then
+                isOccupied = true
+                break
+            end
+        end
+        if not isOccupied then
+            love.graphics.setColor(1, 1, 1, 0.7)
+            love.graphics.printf(tostring(i), area.x, area.y + area.h/2 - 12, area.w, "center")
+        end
+    end
+    love.graphics.setLineWidth(1)
 
 	if draggingItem then
 		local item = menu[draggingItem]
@@ -226,14 +259,27 @@ function select_menu.mousereleased(x, y, button)
 		elseif draggingItem then
 			if y < config.screenHeight - config.menuHeight then
 				local item = menu[draggingItem]
+				local snapTo = nil
+				if snapHighlightIndex then
+					snapTo = snapAreas[snapHighlightIndex]
+				end
 				if item.type == "water_bottle" then
-					-- Create a new water bottle at the drop position
-					local bottle = waterBottle.new(x, y)
+					local bx, by = x, y
+					if snapTo then
+						bx = snapTo.x + snapTo.w/2
+						by = snapTo.y + snapTo.h/2
+					end
+					local bottle = waterBottle.new(bx, by)
 					table.insert(waterBottles, bottle)
 				else
+					local px, py = x - dragOffsetX, y - dragOffsetY
+					if snapTo then
+						px = snapTo.x
+						py = snapTo.y
+					end
 					table.insert(placedItems, {
-						x = x - dragOffsetX,
-						y = y - dragOffsetY,
+						x = px,
+						y = py,
 						w = config.itemWidth,
 						h = config.itemHeight,
 						label = item.label,
@@ -241,14 +287,27 @@ function select_menu.mousereleased(x, y, button)
 				end
 			end
 			draggingItem = nil
+			snapHighlightIndex = nil
 		end
 	end
 end
 
 function select_menu.mousemoved(x, y, dx, dy)
-	if draggingItem then
-		dragX, dragY = x, y
-	end
+    if draggingItem then
+        dragX, dragY = x, y
+        -- Check for snap area collision
+        snapHighlightIndex = nil
+        local itemW, itemH = config.itemWidth, config.itemHeight
+        local dragLeft = dragX - dragOffsetX
+        local dragTop = dragY - dragOffsetY
+        for i, area in ipairs(snapAreas) do
+            if dragLeft + itemW > area.x and dragLeft < area.x + area.w and
+               dragTop + itemH > area.y and dragTop < area.y + area.h then
+                snapHighlightIndex = i
+                break
+            end
+        end
+    end
 end
 
 function select_menu.update(dt)
