@@ -1,6 +1,4 @@
 
----@diagnostic disable: undefined-global
-
 local dog = require "dog"
 
 function love.load()
@@ -11,6 +9,8 @@ function love.load()
 
   -- Set the random seed
   math.randomseed(os.time())
+
+  dog:load()
 end
 
 function love.update(dt)
