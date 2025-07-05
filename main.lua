@@ -4,6 +4,10 @@ function love.load()
 	select_menu.load(1000, 1000)
 end
 
+function love.update(dt)
+	select_menu.update(dt)
+end
+
 function love.draw()
 	select_menu.draw()
 end
