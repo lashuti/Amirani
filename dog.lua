@@ -1,20 +1,27 @@
-
 local Dog = {}
+local dogImage
 
 Dog.x = 200
 Dog.y = 200
 Dog.width = 60
 Dog.height = 30
+Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 120 -- pixels per second
+Dog.speed = 120                   -- pixels per second
 Dog.rotationSpeed = math.rad(120) -- radians per second
 Dog.targets = {
-    {x = 400, y = 200},
-    {x = 400, y = 500},
-    {x = 300, y = 400},
-    {x = 200, y = 100}
+    { x = 400, y = 200 },
+    { x = 400, y = 500 },
+    { x = 300, y = 400 },
+    { x = 200, y = 100 }
 }
 Dog.currentTarget = 1
+
+function Dog:load()
+    dogImage = love.graphics.newImage("assets/dogPlaceholder.png")
+    self.width = dogImage:getWidth() * self.imageScale
+    self.height = dogImage:getHeight() * self.imageScale
+end
 
 function Dog:update(dt)
     local target = self.targets[self.currentTarget]
@@ -51,9 +58,8 @@ function Dog:draw()
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
     love.graphics.rotate(self.angle)
-    love.graphics.setColor(0.8, 0.6, 0.2)
-    love.graphics.rectangle("fill", -self.width/2, -self.height/2, self.width, self.height)
     love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(dogImage, -self.width / 2, -self.height / 2, 0, self.imageScale, self.imageScale)
     love.graphics.pop()
 end
 
