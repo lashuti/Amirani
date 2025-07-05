@@ -46,14 +46,16 @@ function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
-    -- Draw select_menu first (includes background)
+    -- Draw game background first
+    if backgroundImage then
+      love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8)
+    end
+
+    -- Draw select_menu at the bottom (always visible in GAME)
     select_menu.draw()
 
-    -- Draw game elements on top if needed
-    if backgroundImage then
-      love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8) --0.8x scale temp
-    end
-    Dog:draw()                                               -- Uncomment if you want dog visible
+    -- Draw game elements on top
+    Dog:draw()
     Light:draw()
   end
 end

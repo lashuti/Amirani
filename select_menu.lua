@@ -70,8 +70,9 @@ function select_menu.load(sw, sh)
 end
 
 function select_menu.draw()
-	love.graphics.setColor(config.colorBackground)
-	love.graphics.rectangle("fill", 0, 0, config.screenWidth, config.screenHeight - config.menuHeight)
+	-- Remove or comment out the next two lines to keep the area above the menu transparent
+	-- love.graphics.setColor(config.colorBackground)
+	-- love.graphics.rectangle("fill", 0, 0, config.screenWidth, config.screenHeight - config.menuHeight)
 
 	-- Draw regular placed items
 	for _, item in ipairs(placedItems) do
