@@ -8,7 +8,7 @@ Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
 Dog.speed = 120                   -- pixels per second
-Dog.rotationSpeed = math.rad(120) -- radians per second
+Dog.rotationSpeed = math.rad(300) -- radians per second
 Dog.targets = {
     { x = 400, y = 200 },
     { x = 400, y = 500 },
@@ -24,13 +24,26 @@ function Dog:load()
 end
 
 function Dog:update(dt)
-    local target = self.targets[self.currentTarget]
+    local target = self:_getTarget()
     local dx = target.x - self.x
     local dy = target.y - self.y
     local distance = math.sqrt(dx * dx + dy * dy)
+    self:_rotateTowards(dy, dx, dt)
+    self:_moveForward(dt)
+    self:_getCurrentPriorityTarget(distance)
+end
+
+function Dog:_getTarget()
+    if CurrentState == GameState.LIGHT_LEVEL then
+        return { x = love.mouse.getX(), y = love.mouse.getY() }
+    elseif CurrentState == GameState.GAME then
+        return self.targets[self.currentTarget]
+    end
+end
+
+function Dog:_rotateTowards(dy, dx, dt)
     local targetAngle = math.atan2(dy, dx)
     local angleDiff = (targetAngle - self.angle + math.pi) % (2 * math.pi) - math.pi
-
     if math.abs(angleDiff) > 0.001 then
         local rotateAmount = self.rotationSpeed * dt
         if math.abs(angleDiff) < rotateAmount then
@@ -43,13 +56,15 @@ function Dog:update(dt)
             end
         end
     end
+end
 
-    -- Always move forward in the direction the dog is facing
+function Dog:_moveForward(dt)
     self.x = self.x + math.cos(self.angle) * self.speed * dt
     self.y = self.y + math.sin(self.angle) * self.speed * dt
+end
 
-    -- If close to the target, switch to the next one
-    if distance < 10 then
+function Dog:_getCurrentPriorityTarget(distance)
+    if distance < 10 and CurrentState == GameState.GAME then
         self.currentTarget = self.currentTarget % #self.targets + 1
     end
 end

@@ -22,7 +22,7 @@ function Light.enable()
         end
         self._canvas:renderTo(function()
             love.graphics.clear(0, 0, 0, 0)
-            love.graphics.setColor(0, 0, 0, 0.95)
+            love.graphics.setColor(0, 0, 0, 0.85)
             love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
             -- Draw a transparent circle ("cut out")
             love.graphics.setBlendMode("replace", "premultiplied")
@@ -44,6 +44,16 @@ function Light.disable()
     Light.enabled = false
     function Light:update(dt) end
     function Light:draw() end
+end
+
+function Light:keypressed(key)
+    if key == "e" then
+        if self.enabled then
+            self.disable()
+        else
+            self.enable()
+        end
+    end
 end
 
 return Light
