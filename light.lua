@@ -46,4 +46,14 @@ function Light.disable()
     function Light:draw() end
 end
 
+function Light:keypressed(key)
+    if key == "e" then
+        if self.enabled then
+            self.disable()
+        else
+            self.enable()
+        end
+    end
+end
+
 return Light
