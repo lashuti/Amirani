@@ -11,18 +11,7 @@ GameState = {
 CurrentState = GameState.MENU
 
 function love.load()
-  DEBUG_MODE = true
-  WIDTH = 1280
-  HEIGHT = 720
-  love.window.setMode(WIDTH, HEIGHT)
-  love.window.setTitle("Amirani")
-
-  backgroundImage = love.graphics.newImage("assets/backgroundTemp.jpg")
-  -- Set the random seed
-  math.randomseed(os.time())
-
-  Dog:load()
-  Light:load()
+	select_menu.load(1000, 1000)
 end
 
 function love.update(dt)
