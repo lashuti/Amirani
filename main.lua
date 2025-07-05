@@ -6,6 +6,7 @@ local Camera = require "camera"
 local select_menu = require "select_menu"
 local levelManager = require "levelManager"
 local SoundManager = require "sound_manager"
+local Fire = require "fire"
 
 GameState = {
   MENU = "menu",
@@ -14,6 +15,8 @@ GameState = {
 }
 
 CurrentState = GameState.MENU
+
+local fires = {}
 
 function love.load()
   DEBUG_MODE = true
@@ -42,6 +45,11 @@ function love.load()
   
   -- Start default ambiance
   SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
+  
+  -- Create some test fires
+  table.insert(fires, Fire:new(500, 400, {scale = 1.0}))
+  table.insert(fires, Fire:new(700, 500, {scale = 0.7, intensity = 0.8}))
+  table.insert(fires, Fire:new(300, 450, {scale = 1.2, intensity = 1.5}))
 end
 
 function love.update(dt)
@@ -53,6 +61,11 @@ function love.update(dt)
     LightWorldManager:update(dt)
     select_menu.update(dt)
     levelManager.CheckCameraMoveTriggers()
+    
+    -- Update fires
+    for _, fire in ipairs(fires) do
+      fire:update(dt)
+    end
   end
 end
 
@@ -68,6 +81,12 @@ function love.draw()
       end
 
       Dog:draw()
+      
+      -- Draw fires
+      for _, fire in ipairs(fires) do
+        fire:draw()
+      end
+      
       Camera:detach()
     end)
 
