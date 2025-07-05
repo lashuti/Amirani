@@ -1,0 +1,60 @@
+
+local Dog = {}
+
+Dog.x = 200
+Dog.y = 200
+Dog.width = 60
+Dog.height = 30
+Dog.angle = 0
+Dog.speed = 120 -- pixels per second
+Dog.rotationSpeed = math.rad(120) -- radians per second
+Dog.targets = {
+    {x = 400, y = 200},
+    {x = 400, y = 500},
+    {x = 300, y = 400},
+    {x = 200, y = 100}
+}
+Dog.currentTarget = 1
+
+function Dog:update(dt)
+    local target = self.targets[self.currentTarget]
+    local dx = target.x - self.x
+    local dy = target.y - self.y
+    local distance = math.sqrt(dx * dx + dy * dy)
+    local targetAngle = math.atan2(dy, dx)
+    local angleDiff = (targetAngle - self.angle + math.pi) % (2 * math.pi) - math.pi
+
+    if math.abs(angleDiff) > 0.001 then
+        local rotateAmount = self.rotationSpeed * dt
+        if math.abs(angleDiff) < rotateAmount then
+            self.angle = targetAngle
+        else
+            if angleDiff > 0 then
+                self.angle = self.angle + rotateAmount
+            else
+                self.angle = self.angle - rotateAmount
+            end
+        end
+    end
+
+    -- Always move forward in the direction the dog is facing
+    self.x = self.x + math.cos(self.angle) * self.speed * dt
+    self.y = self.y + math.sin(self.angle) * self.speed * dt
+
+    -- If close to the target, switch to the next one
+    if distance < 10 then
+        self.currentTarget = self.currentTarget % #self.targets + 1
+    end
+end
+
+function Dog:draw()
+    love.graphics.push()
+    love.graphics.translate(self.x, self.y)
+    love.graphics.rotate(self.angle)
+    love.graphics.setColor(0.8, 0.6, 0.2)
+    love.graphics.rectangle("fill", -self.width/2, -self.height/2, self.width, self.height)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.pop()
+end
+
+return Dog

@@ -1,6 +1,11 @@
+
+---@diagnostic disable: undefined-global
+
+local dog = require "dog"
+
 function love.load()
-  WIDTH = 1620
-  HEIGHT = 980
+  WIDTH = 1280
+  HEIGHT = 720
   love.window.setMode(WIDTH, HEIGHT)
   love.window.setTitle("Amirani")
 
@@ -9,9 +14,9 @@ function love.load()
 end
 
 function love.update(dt)
-    
+  dog:update(dt)
 end
   
 function love.draw()
-
+  dog:draw()
 end
