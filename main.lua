@@ -1,8 +1,9 @@
 local Dog = require "dog"
 local Light = require "light"
 local Menu = require "menu"
+local Camera = require "camera"
 local select_menu = require "select_menu"
-local cyclone = require "cyclone"
+local levelManager = require "levelManager"
 
 GameState = {
   MENU = "menu",
@@ -26,7 +27,7 @@ function love.load()
   -- Load background if it exists
   local success, result = pcall(love.graphics.newImage, "assets/backgroundTemp.jpg")
   if success then
-    backgroundImage = result
+    BackgroundImage = result
   end
 
   -- Set the random seed
@@ -58,30 +59,7 @@ function love.update(dt)
     Dog:update(dt)
     Light:update(dt)
     select_menu.update(dt)
-
-    -- Update cyclone test
-    if testCyclone then
-      testCyclone:update(dt)
-
-      -- Update test object physics
-      if testObject and not testObject.isDragging then
-        -- Apply cyclone force
-        local fx, fy = testCyclone:getPushForce(testObject.x + testObject.width / 2,
-          testObject.y + testObject.height / 2)
-        
-        
-        testObject.vx = testObject.vx + fx * dt
-        testObject.vy = testObject.vy + fy * dt
-
-        -- Apply friction
-        testObject.vx = testObject.vx * 0.9
-        testObject.vy = testObject.vy * 0.9
-
-        -- Update position
-        testObject.x = testObject.x + testObject.vx * dt
-        testObject.y = testObject.y + testObject.vy * dt
-      end
-    end
+    levelManager.CheckCameraMoveTriggers()
   end
 end
 
@@ -89,31 +67,32 @@ function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
-    -- Draw select_menu first (includes background)
-    -- It is bug fornow
-    select_menu.draw()
-
-    -- Draw game elements on top if needed
-    if backgroundImage then
-      --love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8) --0.8x scale temp
+    Camera:attach()
+    if BackgroundImage then
+      love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8)
     end
-    Dog:draw() -- Uncomment if you want dog visible
+
+    Dog:draw()
     Light:draw()
 
-    -- Draw cyclone test
-    if testCyclone then
-      testCyclone:draw()
+    -- Test red rectangle to see movement of the map
+    local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
+    local rectW, rectH = 100, 60
+    love.graphics.setColor(1, 0, 0, 0.7)
+    love.graphics.rectangle("fill", (screenW-rectW)/2, (screenH-rectH)/2, rectW, rectH)
+    love.graphics.setColor(1, 1, 1, 1)
+    --
 
-      -- Draw test object
-      if testObject then
-        love.graphics.setColor(0.2, 0.8, 0.2)
-        love.graphics.rectangle("fill", testObject.x, testObject.y,
-          testObject.width, testObject.height, 5)
-        love.graphics.setColor(1, 1, 1)
-      end
-    end
+    Camera:detach()
+
+    -- Draw select_menu at the bottom (always visible in GAME)
+    select_menu.draw()
   end
 
+    if(DEBUG_MODE) then
+      local mx, my = love.mouse.getPosition()
+      love.graphics.print("X:" .. mx .. " Y:" .. my, 10, 10)
+    end
 end
 
 function love.keypressed(key)
