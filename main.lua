@@ -23,7 +23,7 @@ function love.load()
   -- Load background if it exists
   local success, result = pcall(love.graphics.newImage, "assets/backgroundTemp.jpg")
   if success then
-    backgroundImage = result
+    BackgroundImage = result
   end
 
   -- Set the random seed
@@ -49,14 +49,22 @@ function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
-    -- Draw game background first
-    if backgroundImage then
-      love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8)
+    Camera:attach()
+    if BackgroundImage then
+      love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8)
     end
 
-    Camera:attach()
     Dog:draw()
     Light:draw()
+
+    -- Test red rectangle to see movement of the map
+    local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
+    local rectW, rectH = 100, 60
+    love.graphics.setColor(1, 0, 0, 0.7)
+    love.graphics.rectangle("fill", (screenW-rectW)/2, (screenH-rectH)/2, rectW, rectH)
+    love.graphics.setColor(1, 1, 1, 1)
+    --
+
     Camera:detach()
 
     -- Draw select_menu at the bottom (always visible in GAME)
