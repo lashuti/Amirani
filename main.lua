@@ -14,6 +14,7 @@ GameState = {
 CurrentState = GameState.MENU
 
 function love.load()
+	select_menu.load(1000, 1000)
   DEBUG_MODE = true
   WIDTH = 1280
   HEIGHT = 720
