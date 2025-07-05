@@ -1,47 +1,21 @@
-local Dog = require "dog"
-local Light = require "light"
+local select_menu = require("select_menu")
 
 function love.load()
-  DEBUG_MODE = true
-  WIDTH = 1280
-  HEIGHT = 720
-  love.window.setMode(WIDTH, HEIGHT)
-  love.window.setTitle("Amirani")
-
-  backgroundImage = love.graphics.newImage("assets/backgroundTemp.jpg")
-  -- Set the random seed
-  math.randomseed(os.time())
-
-  Dog:load()
-  Light:load()
-end
-
-function love.update(dt)
-  Dog:update(dt)
-  Light:update(dt)
+	select_menu.load(1000, 1000)
 end
 
 function love.draw()
-  love.graphics.draw(backgroundImage, 0, 0, 0, 0.8, 0.8) --0.8x scale temp
-  Dog:draw()
-  Light:draw()
-
-  if(DEBUG_MODE) then
-    local mx, my = love.mouse.getPosition()
-    love.graphics.print("X:" .. mx .. " Y:" .. my, 10, 10)
-  end
+	select_menu.draw()
 end
 
-function love.keypressed(key)
-  HandleLightToggle(key)
+function love.mousepressed(x, y, button)
+	select_menu.mousepressed(x, y, button)
 end
 
-function HandleLightToggle(key)
-  if key == "e" then
-    if Light.enabled then
-      Light.disable()
-    else
-      Light.enable()
-    end
-  end
+function love.mousereleased(x, y, button)
+	select_menu.mousereleased(x, y, button)
+end
+
+function love.mousemoved(x, y, dx, dy)
+	select_menu.mousemoved(x, y, dx, dy)
 end
