@@ -60,18 +60,9 @@ function love.draw()
       end
 
       Dog:draw()
-
-      -- Test red rectangle to see movement of the map
-      local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
-      local rectW, rectH = 100, 60
-      love.graphics.setColor(1, 0, 0, 0.7)
-      love.graphics.rectangle("fill", (screenW - rectW) / 2, (screenH - rectH) / 2, rectW, rectH)
-      love.graphics.setColor(1, 1, 1, 1)
-      --
-
       Camera:detach()
     end)
-    
+
     -- Draw the old light overlay if enabled (on top of light world)
     Light:draw()
 
@@ -87,8 +78,7 @@ end
 
 function love.keypressed(key)
   if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
-    -- Light:keypressed(key)  -- Comment out old light system
-    LightWorldManager:keypressed(key)  -- Use light_world instead
+    LightWorldManager:keypressed(key)                                             -- Use light_world instead
   end
 end
 
