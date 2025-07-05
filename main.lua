@@ -13,10 +13,6 @@ GameState = {
 
 CurrentState = GameState.MENU
 
--- Test objects for cyclone
-local testCyclone = nil
-local testObject = nil
-
 function love.load()
   DEBUG_MODE = true
   WIDTH = 1280
@@ -36,20 +32,6 @@ function love.load()
   Dog:load()
   Light:load()
   select_menu.load(WIDTH, HEIGHT)
-
-  -- Create test cyclone at center, positioned at ground level
-  testCyclone = cyclone.new(WIDTH / 2, HEIGHT - 100)
-  
-  -- Initialize test object near cyclone
-  testObject = {
-    x = WIDTH / 2 - 100,  -- Position near cyclone
-    y = HEIGHT - 200,     -- Near bottom where cyclone is
-    vx = 0,
-    vy = 0,
-    width = 40,
-    height = 40,
-    isDragging = false
-  }
 end
 
 function love.update(dt)
@@ -79,7 +61,7 @@ function love.draw()
     local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
     local rectW, rectH = 100, 60
     love.graphics.setColor(1, 0, 0, 0.7)
-    love.graphics.rectangle("fill", (screenW-rectW)/2, (screenH-rectH)/2, rectW, rectH)
+    love.graphics.rectangle("fill", (screenW - rectW) / 2, (screenH - rectH) / 2, rectW, rectH)
     love.graphics.setColor(1, 1, 1, 1)
     --
 
@@ -89,10 +71,10 @@ function love.draw()
     select_menu.draw()
   end
 
-    if(DEBUG_MODE) then
-      local mx, my = love.mouse.getPosition()
-      love.graphics.print("X:" .. mx .. " Y:" .. my, 10, 10)
-    end
+  if (DEBUG_MODE) then
+    local mx, my = love.mouse.getPosition()
+    love.graphics.print("X:" .. mx .. " Y:" .. my, 10, 10)
+  end
 end
 
 function love.keypressed(key)
