@@ -1,8 +1,10 @@
 local Dog = {}
+local anim8 = require "libs/anim8"
 local dogImage
+local dogAnimation
 
-Dog.x = 200
-Dog.y = 200
+Dog.x = 500
+Dog.y = 500
 Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
@@ -18,9 +20,9 @@ Dog.targets = {
 Dog.currentTarget = 1
 
 function Dog:load()
-    dogImage = love.graphics.newImage("assets/dogPlaceholder.png")
-    self.width = dogImage:getWidth() * self.imageScale
-    self.height = dogImage:getHeight() * self.imageScale
+    dogImage = love.graphics.newImage("assets/DogRSpritesheet.png")
+    local grid = anim8.newGrid(500, 500, dogImage:getWidth(), dogImage:getHeight())
+    dogAnimation = anim8.newAnimation(grid('1-6', 1), 0.1)
 end
 
 function Dog:update(dt)
@@ -31,6 +33,8 @@ function Dog:update(dt)
     self:_rotateTowards(dy, dx, dt)
     self:_moveForward(dt)
     self:_getCurrentPriorityTarget(distance)
+
+    dogAnimation:update(dt)
 end
 
 function Dog:_getTarget()
@@ -74,7 +78,9 @@ function Dog:draw()
     love.graphics.translate(self.x, self.y)
     love.graphics.rotate(self.angle)
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(dogImage, -self.width / 2, -self.height / 2, 0, self.imageScale, self.imageScale)
+
+    dogAnimation:draw(dogImage, 100, 100)
+    --dogAnimation:draw(dogImage, -self.width / 2, -self.height / 2, 0, self.imageScale, self.imageScale)
     love.graphics.pop()
 end
 
