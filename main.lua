@@ -13,7 +13,7 @@ local Cyclone = require "cyclone"
 local fires = {}
 local cyclone
 
-local Dog = require "dog_anim"
+local Dog = require "dog"
 
 GameState = {
   MENU = "menu",
