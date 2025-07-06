@@ -1,6 +1,9 @@
 -- Map module for loading and managing background images
 local map = {}
 
+-- Track if we should show the upper part of the map
+map.showUpperPart = false
+
 -- Default configuration
 map.imagePath = "assets/map.png"
 map.background = nil
@@ -68,20 +71,39 @@ end
 
 function map:draw()
     love.graphics.setColor(1, 1, 1, 1) -- Reset color to white (important if you use tinting elsewhere)
-    local scaleMultiplier = 0.55
     local screenWidth = love.graphics.getWidth()
     local screenHeight = love.graphics.getHeight()
     local bgWidth = background:getWidth()
     local bgHeight = background:getHeight()
-    local scaleX = screenWidth / (bgWidth * scaleMultiplier)
-    local scaleY = screenHeight / (bgHeight * scaleMultiplier)
-    -- Draw so that the bottom left of the image is at (0, screenHeight)
-    love.graphics.draw(background, 0, screenHeight - bgHeight * scaleY, 0, scaleX, scaleY)
+    local scaleX, scaleY, drawY
+
+    if self.imagePath and (self.imagePath:find("darkLevelBg")) then
+        -- For dark level, fit 100% of the image to the screen
+        scaleX = screenWidth / bgWidth
+        scaleY = screenHeight / bgHeight
+        drawY = 0
+    else
+        local scaleMultiplier = 0.55
+        scaleX = screenWidth / (bgWidth * scaleMultiplier)
+        scaleY = screenHeight / (bgHeight * scaleMultiplier)
+        if map.showUpperPart then
+            -- Show the upper part, but keep about 30% of the current map at the bottom
+            local visibleHeight = bgHeight * scaleY
+            local overlap = visibleHeight * 0.3
+            drawY = -(visibleHeight - screenHeight) + overlap
+            if drawY > 0 then drawY = 0 end
+        else
+            drawY = screenHeight - bgHeight * scaleY
+        end
+    end
+    love.graphics.draw(background, 0, drawY, 0, scaleX, scaleY)
 end
 
 -- Function to set a new image path
 function map:setImagePath(newPath)
     self.imagePath = newPath
+    -- Reset scale logic if needed
+    self.showUpperPart = false
 end
 
 -- Function to reload with current or new path

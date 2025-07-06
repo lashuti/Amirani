@@ -1,6 +1,7 @@
 
 -- Dog module: merges movement/logic and animation
 local Dog = {}
+local Map = require "map"
 local dogImage
 
 -- Animation
@@ -17,7 +18,7 @@ Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 120
+Dog.speed = 350--120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
     { x = 10, y = 320 },
@@ -25,7 +26,9 @@ Dog.targets = {
     { x = 440, y = 540 },
     { x = 900, y = 520 },
     { x = 1000, y = 340 },
-    { x = 680, y = 20 }
+    { x = 680, y = 0 },
+    { x = 480, y = 420 },
+    { x = 670, y = 120 },
 }
 Dog.currentTarget = 1
 
@@ -51,6 +54,16 @@ function Dog:load()
 end
 
 function Dog:update(dt)
+    -- Switch to LIGHT_LEVEL and dark background when dog reaches (670, 120)
+    if CurrentState == GameState.GAME then
+        if math.abs(self.x - 670) < 15 and math.abs(self.y - 120) < 15 then
+            if Map and Map.setImagePath then
+                Map:setImagePath("assets/darkLevelBg.png")
+                if Map.reload then Map:reload() end
+            end
+
+        end
+    end
     -- Animation
     frameTimer = frameTimer + dt
     if frameTimer >= frameDuration then
@@ -81,6 +94,19 @@ function Dog:update(dt)
     end
 
     self:_getCurrentPriorityTarget(distance)
+
+    -- Switch map when dog reaches (680, 0) regardless of target order
+    if CurrentState == GameState.GAME then
+        if math.abs(self.x - 680) < 15 and math.abs(self.y - 0) < 15 then
+            if not Map.showUpperPart and Map and Map.showUpperPart ~= nil then
+                Map.showUpperPart = true
+                self.x = 920
+                self.y = 600
+                -- Jump to next target after map switch
+                self.currentTarget = self.currentTarget % #self.targets + 1
+            end
+        end
+    end
 end
 
 function Dog:_getTarget()
