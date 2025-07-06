@@ -284,6 +284,11 @@ function select_menu.mousereleased(x, y, button)
           end
           local bottle = waterBottle.new(bx, by)
           table.insert(waterBottles, bottle)
+          
+          -- Play inventory grab sound when placing water bottle from menu
+          if SoundManager and SoundManager.play then
+            SoundManager:play("water", math.random() < 0.5 and "bottleGrab1" or "bottleGrab2", 0.6)
+          end
         elseif item.type == "wall" then
           -- Place wall at mouse position with current rotation
           local wall = Wall.new(x, y, wallRotation)
@@ -406,6 +411,11 @@ end
 -- Get all walls (for external systems like cyclone)
 function select_menu.getWalls()
   return walls
+end
+
+-- Get all water bottles (for collision detection)
+function select_menu.getWaterBottles()
+  return waterBottles
 end
 
 -- Handle keyboard input for rotation
