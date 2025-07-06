@@ -16,6 +16,7 @@ local steamEffects = {}
 
 local Dog = require "dog_anim"
 local SteamEffect = require "steam_effect"
+local Dog = require "dog"
 
 GameState = {
   MENU = "menu",
