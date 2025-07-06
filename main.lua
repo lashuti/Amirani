@@ -13,7 +13,7 @@ local Cyclone = require "cyclone"
 local fires = {}
 local cyclone
 
-local DogAnim = require "dog_anim"
+local Dog = require "dog_anim"
 
 GameState = {
   MENU = "menu",
@@ -29,7 +29,7 @@ function love.load()
   Light:load()
   LightWorldManager:load()
     SelectMenu.load()
-  DogAnim.load()
+  Dog:load()
 
   -- Load sounds and make globally accessible
   SoundManager:load()
@@ -53,7 +53,7 @@ function love.update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
         LevelManager.CheckCameraMoveTriggers()
-    DogAnim.update(dt)
+    Dog:update(dt)
     
     -- Update fires
     for _, fire in ipairs(fires) do
@@ -74,7 +74,6 @@ function love.draw()
     Menu:draw()
 
   elseif CurrentState == GameState.GAME then
-    DogAnim.draw(30, 30)
     LightWorldManager:draw(function()
       Camera:attach()
       Map:draw()
@@ -89,8 +88,8 @@ function love.draw()
         fire:draw()
       end
 
-      -- Draw dog animation at (100, 100)
-      DogAnim.draw(100, 100, 0.4)
+      -- Draw the dog animation on the map
+      Dog:draw()
 
       Camera:detach()
     end)

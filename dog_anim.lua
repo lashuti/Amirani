@@ -1,26 +1,56 @@
--- dog_anim.lua
--- Handles loading and animating a sequence of PNGs for the dog animation
 
-local DogAnim = {}
+-- Dog module: merges movement/logic and animation
+local Dog = {}
+local dogImage
 
+-- Animation
 local frames = {}
 local frameIndex = 1
 local frameTimer = 0
-local frameDuration = 0.1 -- seconds per frame
-local scale = 0.4 -- Default scale factor for the dog animation
+local frameDuration = 0.1
+local scale = 0.4
 
-function DogAnim.load()
+-- Movement/logic
+Dog.x = 200
+Dog.y = 200
+Dog.width = 60
+Dog.height = 30
+Dog.imageScale = 0.2
+Dog.angle = 0
+Dog.speed = 120
+Dog.rotationSpeed = math.rad(300)
+Dog.targets = {
+    { x = 400, y = 200 },
+    { x = 400, y = 500 },
+    { x = 300, y = 400 },
+    { x = 200, y = 100 }
+}
+Dog.currentTarget = 1
+
+function Dog:load()
+    -- Load animation frames
     frames = {}
     for i = 1, 6 do -- Change 6 to however many frames you have
         frames[i] = love.graphics.newImage("assets/animations/dog/" .. i .. ".png")
     end
     frameIndex = 1
     frameTimer = 0
-    scale = 0.4 -- Set the scale factor for the dog animation (adjust as needed)
-end
--- ...existing code...
+    scale = 0.4
+    -- For fallback/static image
+    dogImage = love.graphics.newImage("assets/dogPlaceholder.png")
 
-function DogAnim.update(dt)
+    -- Set width and height based on animation frames if available, otherwise fallback image
+    if #frames > 0 then
+        self.width = frames[1]:getWidth() * scale
+        self.height = frames[1]:getHeight() * scale
+    else
+        self.width = dogImage:getWidth() * self.imageScale
+        self.height = dogImage:getHeight() * self.imageScale
+    end
+end
+
+function Dog:update(dt)
+    -- Animation
     frameTimer = frameTimer + dt
     if frameTimer >= frameDuration then
         frameTimer = frameTimer - frameDuration
@@ -29,16 +59,73 @@ function DogAnim.update(dt)
             frameIndex = 1
         end
     end
+    -- Movement
+    local target = self:_getTarget()
+    local dx = target.x - self.x
+    local dy = target.y - self.y
+    local distance = math.sqrt(dx * dx + dy * dy)
+    self:_rotateTowards(dy, dx, dt)
+    self:_moveForward(dt)
+    self:_getCurrentPriorityTarget(distance)
 end
 
-function DogAnim.draw(x, y, s)
-    if #frames > 0 then
-        love.graphics.draw(frames[frameIndex], x or 30, y or 30, 0, s or scale, s or scale)
+function Dog:_getTarget()
+    if CurrentState == GameState.LIGHT_LEVEL then
+        return { x = love.mouse.getX(), y = love.mouse.getY() }
+    elseif CurrentState == GameState.GAME then
+        return self.targets[self.currentTarget]
     end
 end
 
-function DogAnim.setScale(s)
+function Dog:_rotateTowards(dy, dx, dt)
+    local targetAngle = math.atan2(dy, dx)
+    local angleDiff = (targetAngle - self.angle + math.pi) % (2 * math.pi) - math.pi
+    if math.abs(angleDiff) > 0.001 then
+        local rotateAmount = self.rotationSpeed * dt
+        if math.abs(angleDiff) < rotateAmount then
+            self.angle = targetAngle
+        else
+            if angleDiff > 0 then
+                self.angle = self.angle + rotateAmount
+            else
+                self.angle = self.angle - rotateAmount
+            end
+        end
+    end
+end
+
+function Dog:_moveForward(dt)
+    self.x = self.x + math.cos(self.angle) * self.speed * dt
+    self.y = self.y + math.sin(self.angle) * self.speed * dt
+end
+
+function Dog:_getCurrentPriorityTarget(distance)
+    if distance < 10 and CurrentState == GameState.GAME then
+        self.currentTarget = self.currentTarget % #self.targets + 1
+    end
+end
+
+    function Dog:draw(s)
+    -- Draw animated dog if frames exist, else fallback to static image
+    if #frames > 0 then
+        love.graphics.push()
+        love.graphics.translate(self.x, self.y)
+        love.graphics.rotate(self.angle)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(frames[frameIndex], -(self.width/2), -(self.height/2), 0, s or scale, s or scale)
+        love.graphics.pop()
+    else
+        love.graphics.push()
+        love.graphics.translate(self.x, self.y)
+        love.graphics.rotate(self.angle)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(dogImage, -self.width / 2, -self.height / 2, 0, self.imageScale, self.imageScale)
+        love.graphics.pop()
+    end
+end
+
+function Dog.setScale(s)
     scale = s or scale
 end
 
-return DogAnim
+return Dog
