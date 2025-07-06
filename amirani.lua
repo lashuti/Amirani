@@ -61,18 +61,6 @@ function Amirani:update(dt, dogX, dogY)
   local distance = math.sqrt(dx * dx + dy * dy)
 
   if self.isChained and not self.isReleased then
-    -- Voice system when chained
-    self.voiceTimer = self.voiceTimer + dt
-    if self.voiceTimer >= self.voiceInterval then
-      self.voiceTimer = 0
-      if distance < self.voiceRadius then
-        -- Play voice based on distance
-        if SoundManager and SoundManager.playAmiraniShout then
-          SoundManager:playAmiraniShout(distance)
-        end
-      end
-    end
-    
     -- Chain sound system when dog is near
     if distance < 300 then -- Play chain sounds when dog is fairly close
       self.chainSoundTimer = self.chainSoundTimer + dt

@@ -66,8 +66,14 @@ function love.load()
   SoundManager:load()
   _G.SoundManager = SoundManager
 
-  -- Start ambient nature sound as background music
-  SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
+  -- Start ambient valley sound as background music (background loop)
+  SoundManager:startAmbiance(SoundManager.AMBIANCE.VALLEY, 1.0)
+  _G.currentAmbiance = "valley"
+
+  -- Example: switch to valley ambiance after 10 seconds (demo)
+  -- You can trigger these on any event, e.g. map/background change
+  _G.ambianceSwitchTimer = 0
+  _G.ambianceTarget = nil
 
   -- Create 3 fire elements for testing
   table.insert(fires, Fire:new(200, 400, { scale = 1.0, intensity = 1.0 }))
@@ -82,10 +88,41 @@ function love.load()
   cyclone = Cyclone.new(600, 500)
   
   -- Create Amirani (placed at a test location near other elements)
-  amirani = Amirani:new(900, 300)
+
 end
 
 function love.update(dt)
+  -- Dynamically switch ambient sound based on map image
+  if Map then
+    if Map.showTopRight and (_G.currentAmbiance ~= "tension") then
+      SoundManager:stopAmbiance()
+      SoundManager:startAmbiance(SoundManager.AMBIANCE.TENSION)
+      _G.currentAmbiance = "tension"
+    elseif Map.imagePath and Map.imagePath:find("darkLevelBg") and (_G.currentAmbiance ~= "dark") then
+      SoundManager:stopAmbiance()
+      SoundManager:startAmbiance(SoundManager.AMBIANCE.TENSION)
+      _G.currentAmbiance = "dark"
+    elseif Map.imagePath and Map.imagePath:find("map.png") and (_G.currentAmbiance ~= "nature") and not Map.showTopRight then
+      SoundManager:stopAmbiance()
+      SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
+      _G.currentAmbiance = "nature"
+    end
+  end
+  -- Play Amirani shout every 15 seconds, randomly choosing a shout, but only if map is showing top right or upper part
+  if (Map.showTopRight or Map.showUpperPart) then
+    if not _G.amiraniShoutTimer then _G.amiraniShoutTimer = 0 end
+    _G.amiraniShoutTimer = _G.amiraniShoutTimer + dt
+    if _G.amiraniShoutTimer >= 15.0 then
+      _G.amiraniShoutTimer = 0
+      if SoundManager and SoundManager.play then
+        local shoutKeys = {"shoutClose1", "shoutClose2", "shoutMid", "shoutFar"}
+        local key = shoutKeys[math.random(1, #shoutKeys)]
+        SoundManager:play("amirani", key, 1.0)
+      end
+    end
+  else
+    _G.amiraniShoutTimer = 0
+  end
   if CurrentState == GameState.MENU then
     Menu:update(dt)
   elseif CurrentState == GameState.GAME then
@@ -95,6 +132,9 @@ function love.update(dt)
     LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
     
+    if Map.showTopRight and not amirani then
+      amirani = Amirani:new(1175, 270)
+    end
     -- Update Amirani
     if amirani then
       amirani:update(dt, Dog.x, Dog.y)

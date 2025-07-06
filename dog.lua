@@ -18,7 +18,7 @@ Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 800 --120
+Dog.speed = 120 --120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
     { x = 10, y = 320 },
@@ -36,8 +36,14 @@ Dog.targets = {
     { x = 1000, y = 333 },
     { x = 1140, y = 420 },
     { x = 1280, y = 600 },
+    { x = 480, y = 140 },
+    { x = 490, y = 510 },
+    { x = 890, y = 500 },
+    { x = 940, y = 280 },
+    { x = 1120, y = 280 }
 }
 Dog.currentTarget = 1
+Dog.stopped = false
 
 function Dog:load()
     -- Load animation frames
@@ -61,6 +67,8 @@ function Dog:load()
 end
 
 function Dog:update(dt)
+    -- Stop movement if at last target
+    if self.stopped then return end
     -- Switch back to map.png and show top right when dog reaches (1280, 600)
     if math.abs(self.x - 1280) < 15 and math.abs(self.y - 600) < 15 then
         if Map and Map.setImagePath then
@@ -157,11 +165,16 @@ end
 
 function Dog:_getCurrentPriorityTarget(distance)
     if distance < 10 and CurrentState == GameState.GAME then
-        self.currentTarget = self.currentTarget % #self.targets + 1
+        if self.currentTarget == #self.targets then
+            self.stopped = true
+        else
+            self.currentTarget = self.currentTarget + 1
+        end
     end
 end
 
 function Dog:draw(s)
+    if self.stopped then return end
     -- Draw a shadow by drawing the dog image/animation in black, slightly offset and squashed
     local shadowOffsetY = self.height * 0.40
     local shadowScaleY = 0.45 * (s or scale or 1)

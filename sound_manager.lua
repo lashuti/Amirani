@@ -173,7 +173,7 @@ SoundManager.activeLoops = {}
 
 SoundManager.masterVolume = 1.0
 SoundManager.sfxVolume = 1.0
-SoundManager.ambientVolume = 0.7
+SoundManager.ambientVolume = 1.0
 SoundManager.musicVolume = 0.8
 
 function SoundManager:load()
