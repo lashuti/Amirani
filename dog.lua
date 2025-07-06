@@ -30,16 +30,17 @@ Dog.targets = {
     { x = 900, y = 520 },
     { x = 950, y = 340 },
     { x = 680, y = 0 },
-    { x = 480, y = 420 },
+    { x = 650, y = 420 },
     { x = 670, y = 120 },
     { x = 1, y = 200 },
     { x = 157, y = 216 },
     { x = 400, y = 366 },
     { x = 777, y = 333 },
     { x = 1000, y = 333 },
-    { x = 1140, y = 420 },
+    { x = 1140, y = 380 },
+    { x = 1200, y = 420 },
     { x = 1280, y = 600 },
-    { x = 480, y = 140 }, --
+    { x = 480, y = 140 },
     { x = 490, y = 510 },
     { x = 890, y = 500 },
     { x = 940, y = 280 },
@@ -103,6 +104,10 @@ function Dog:update(dt)
             if Map.reload then Map:reload() end
             -- Show top right: set a new flag for this state
             Map.showTopRight = true
+            -- Set dog position for level 4
+            self.currentTarget = self.currentTarget % #self.targets + 1
+            self.x = 480
+            self.y = 140
         end
     end
     -- Switch to LIGHT_LEVEL and dark background when dog reaches (670, 120)

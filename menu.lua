@@ -8,11 +8,11 @@ end
 
 function Menu:draw()
     love.graphics.setFont(love.graphics.newFont(36))
-    love.graphics.printf("AMIRANI", 0, 100, love.graphics.getWidth(), "center")
+    -- Remove title drawing here, handled in main.lua
     local buttonWidth = 400
     local buttonHeight = 70
     local spacing = 30
-    local startY = 200
+    local startY = 220 -- Lower so buttons don't overlap the title
     local screenWidth = love.graphics.getWidth()
     for i, item in ipairs(self.items) do
         local x = (screenWidth - buttonWidth) / 2

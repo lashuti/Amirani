@@ -3,11 +3,11 @@ local Eagle = {}
 Eagle.active = false
 Eagle.x = 0
 Eagle.y = 0
-Eagle.speed = 300 -- twice as fast
+Eagle.speed = 600 -- twice as fast
 Eagle.image = nil
 Eagle.width = 0
 Eagle.height = 0
-Eagle.scale = 0.35
+Eagle.scale = 0.20
 
 function Eagle:load()
     -- Load eagle image and create a blurry version

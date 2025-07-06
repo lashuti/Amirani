@@ -87,7 +87,6 @@ end
 
 function love.update(dt)
   -- Dynamically switch ambient sound based on map image
-  if Map then
     if Map.showTopRight and (_G.currentAmbiance ~= "tension") then
       SoundManager:stopAmbiance()
       SoundManager:startAmbiance(SoundManager.AMBIANCE.TENSION)
@@ -101,7 +100,6 @@ function love.update(dt)
       SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
       _G.currentAmbiance = "nature"
     end
-  end
 
 
   -- Toggle light world if LEVEL == 3
@@ -130,9 +128,9 @@ function love.update(dt)
 
   if LEVEL == 4 then
     if not _G.firesSpawnedForLevel4 then
-      table.insert(fires, Fire:new(500, 600, { scale = 1.0, intensity = 1.0 }))
-      table.insert(fires, Fire:new(700, 560, { scale = 1.2, intensity = 1.3 }))
-      table.insert(fires, Fire:new(850, 610, { scale = 0.8, intensity = 0.8 }))
+      table.insert(fires, Fire:new(600, 600, { scale = 1.0, intensity = 1.0 }))
+      table.insert(fires, Fire:new(680, 560, { scale = 1.2, intensity = 1.3 }))
+      table.insert(fires, Fire:new(750, 610, { scale = 0.8, intensity = 0.8 }))
       _G.firesSpawnedForLevel4 = true
     end
   else
@@ -331,6 +329,8 @@ function love.draw()
     love.graphics.print(title, (sw-tw)/2, 60)
     love.graphics.setFont(prevFont)
     love.graphics.setColor(1, 1, 1)
+    -- Draw menu buttons after title
+    Menu:draw()
 
   elseif CurrentState == GameState.GAME then
     LightWorldManager:draw(function()
