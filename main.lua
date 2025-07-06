@@ -1,9 +1,7 @@
 local Gun = require "gun"
-local enemies = {
-  {x = 600, y = 300, width = 40, height = 40},
-  {x = 700, y = 350, width = 40, height = 40},
-  {x = 800, y = 250, width = 40, height = 40},
-}
+local Eagle = require "eagle"
+local enemies = {}
+
 local Light = require "light"
 local LightWorldManager = require "lightworld_manager"
 local Menu = require "menu"
@@ -40,7 +38,7 @@ function love.load()
   SelectMenu.load()
   Dog:load()
   Gun:load()
-
+  Eagle:load()
   -- Load sounds and make globally accessible
   SoundManager:load()
   _G.SoundManager = SoundManager
@@ -63,7 +61,7 @@ function love.update(dt)
     SelectMenu.update(dt)
     LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
-
+    Eagle:update(dt, Dog.x, Dog.y)
     -- Update fires
     for _, fire in ipairs(fires) do
       fire:update(dt)
@@ -140,14 +138,13 @@ function love.update(dt)
 end
 
 function love.draw()
-
   if CurrentState == GameState.MENU then
     Menu:draw()
   elseif CurrentState == GameState.GAME then
     LightWorldManager:draw(function()
       Camera:attach()
       Map:draw()
-
+      Eagle:draw()
       -- Draw cyclone
       if cyclone then
         cyclone:draw()
@@ -166,13 +163,13 @@ function love.draw()
       -- Draw the dog animation on the map
       Dog:draw()
 
-      --temp enemy draw TODO delete
-      for _, e in ipairs(enemies) do
-      love.graphics.setColor(1, 0, 0)
-      love.graphics.rectangle('fill', e.x, e.y, e.width, e.height)
-      love.graphics.setColor(1, 1, 1)
-    end
-      Gun:draw()
+      -- Draw enemy eagles
+      if CurrentState == GameState.GAME then
+        for _, e in ipairs(enemies) do
+          if e.active then e:draw() end
+        end
+        Gun:draw()
+      end
 
       Camera:detach()
     end)
@@ -190,6 +187,9 @@ function love.keypressed(key)
   -- TODO instead of G make it a button in the menu
   if key == 'g' and CurrentState == GameState.GAME then
     if Gun.active then Gun:deactivate() else Gun:activate() end
+  end
+  if key == 'r' and CurrentState == GameState.GAME then
+    Eagle:activate(Dog.x, Dog.y)
   end
   if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
     LightWorldManager:keypressed(key)                                             -- Use light_world instead
