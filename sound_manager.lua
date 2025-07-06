@@ -327,7 +327,7 @@ function SoundManager:startLoop(category, soundName, volume, pitch)
   end
 
   -- Start new loop
-  local source = sound:clone()
+  local source = sound
   source:setLooping(true)
   source:setVolume((volume or 1.0) * self.ambientVolume * self.masterVolume)
   source:setPitch(pitch or 1.0)

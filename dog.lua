@@ -11,6 +11,9 @@ local frameTimer = 0
 local frameDuration = 0.1
 local scale = 0.1
 
+--LEVELS
+LEVEL = 1
+
 -- Movement/logic
 Dog.x = 0
 Dog.y = 300
@@ -18,12 +21,12 @@ Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 120 --120
+Dog.speed = 400--120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
     { x = 10, y = 320 },
-    { x = 330, y = 305 },
-    { x = 440, y = 540 },
+    { x = 330, y = 335 },
+    { x = 420, y = 540 },
     { x = 900, y = 520 },
     { x = 1000, y = 340 },
     { x = 680, y = 0 },
@@ -36,7 +39,7 @@ Dog.targets = {
     { x = 1000, y = 333 },
     { x = 1140, y = 420 },
     { x = 1280, y = 600 },
-    { x = 480, y = 140 },
+    { x = 480, y = 140 }, --
     { x = 490, y = 510 },
     { x = 890, y = 500 },
     { x = 940, y = 280 },
@@ -72,6 +75,7 @@ function Dog:update(dt)
     -- Switch back to map.png and show top right when dog reaches (1280, 600)
     if math.abs(self.x - 1280) < 15 and math.abs(self.y - 600) < 15 then
         if Map and Map.setImagePath then
+            LEVEL = 4
             Map:setImagePath("assets/map.png")
             if Map.reload then Map:reload() end
             -- Show top right: set a new flag for this state
@@ -82,6 +86,7 @@ function Dog:update(dt)
     if CurrentState == GameState.GAME then
         if math.abs(self.x - 670) < 15 and math.abs(self.y - 120) < 15 then
             if Map and Map.setImagePath then
+                LEVEL = 3
                 Map:setImagePath("assets/darkLevelBg.png")
                 if Map.reload then Map:reload() end
             end
@@ -93,6 +98,7 @@ function Dog:update(dt)
         -- Switch back to map and show top right when dog reaches (1280, 600)
         if math.abs(self.x - 1280) < 15 and math.abs(self.y - 600) < 15 then
             if Map and Map.setImagePath then
+                LEVEL = 4
                 Map:setImagePath("assets/map.png")
                 if Map.reload then Map:reload() end
                 if Map then
@@ -139,6 +145,7 @@ function Dog:update(dt)
         if math.abs(self.x - 680) < 15 and math.abs(self.y - 0) < 15 then
             if not Map.showUpperPart and Map and Map.showUpperPart ~= nil then
                 Map.showUpperPart = true
+                LEVEL = 2
                 self.x = 920
                 self.y = 600
                 -- Jump to next target after map switch

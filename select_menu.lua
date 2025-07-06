@@ -1,3 +1,4 @@
+
 local select_menu = {}
 local waterBottle = require("water_bottle")
 local settings = require("settings")
@@ -80,6 +81,16 @@ function select_menu.load()
       label = label,
       type = itemType,
     })
+  end
+end
+
+-- Remove all walls if level 3 and activeWall exists
+function select_menu.removeAllWallsIfLevel3(level)
+  if level == 3 and _G.activeWall ~= nil then
+    for i = #_G.walls, 1, -1 do
+      table.remove(_G.walls, i)
+    end
+    _G.activeWall = nil
   end
 end
 

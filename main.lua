@@ -75,20 +75,12 @@ function love.load()
   _G.ambianceSwitchTimer = 0
   _G.ambianceTarget = nil
 
-  -- Create 3 fire elements for testing
-  table.insert(fires, Fire:new(200, 400, { scale = 1.0, intensity = 1.0 }))
-  table.insert(fires, Fire:new(500, 450, { scale = 1.2, intensity = 1.3 }))
-  table.insert(fires, Fire:new(800, 380, { scale = 0.8, intensity = 0.8 }))
-
-  -- Create 2 pit traps for testing
-  table.insert(pits, Pit:new(350, 500, 60)) -- x, y, radius
-  table.insert(pits, Pit:new(650, 350, 50))
+  -- Create pit with custom image at (620, 540)
+  local pit = Pit:new(620, 540, 50)
+  local pit2 = Pit:new(925, 120, 60)
+  table.insert(pits, pit)
+  table.insert(pits, pit2)
   
-  -- Create cyclone
-  cyclone = Cyclone.new(600, 500)
-  
-  -- Create Amirani (placed at a test location near other elements)
-
 end
 
 function love.update(dt)
@@ -108,6 +100,42 @@ function love.update(dt)
       _G.currentAmbiance = "nature"
     end
   end
+
+
+  -- Toggle light world if LEVEL == 3
+  if LEVEL == 3 then
+    LightWorldManager:ToggleOn()
+    -- Delete cyclone if present
+    cyclone = nil
+    SelectMenu.removeAllWallsIfLevel3(LEVEL)
+  else
+    LightWorldManager:ToggleOff()
+    -- Spawn cyclone at (430, 490) only once if level 2
+    if LEVEL == 2 then
+      if not _G.cycloneSpawnedForLevel2 then
+        cyclone = Cyclone.new(420, 440)
+        _G.cycloneSpawnedForLevel2 = true
+      end
+
+      for i = #pits, 1, -1 do
+        table.remove(pits, i)
+      end
+    else
+      _G.cycloneSpawnedForLevel2 = false
+    end
+  end
+
+  if LEVEL == 4 then
+    if not _G.firesSpawnedForLevel4 then
+      table.insert(fires, Fire:new(500, 600, { scale = 1.0, intensity = 1.0 }))
+      table.insert(fires, Fire:new(700, 560, { scale = 1.2, intensity = 1.3 }))
+      table.insert(fires, Fire:new(850, 610, { scale = 0.8, intensity = 0.8 }))
+      _G.firesSpawnedForLevel4 = true
+    end
+  else
+    _G.firesSpawnedForLevel4 = false
+  end
+  
   -- Play Amirani shout every 15 seconds, randomly choosing a shout, but only if map is showing top right or upper part
   if (Map.showTopRight or Map.showUpperPart) then
     if not _G.amiraniShoutTimer then _G.amiraniShoutTimer = 0 end
@@ -351,8 +379,7 @@ function love.keypressed(key)
   if key == 'r' and CurrentState == GameState.GAME then
     Eagle:activate(Dog.x, Dog.y)
   end
-  if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
-    LightWorldManager:keypressed(key)                                             -- Use light_world instead
+  if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future                                        -- Use light_world instead
     SelectMenu.keypressed(key)                                                    -- Handle wall rotation
   end
 end

@@ -10,6 +10,8 @@ function cyclone.new(x, y)
     strength = 300,
     particles = {},
     time = 0,
+
+    rotation = math.pi / 2, -- 90 degrees in radians
   }
 
   -- Initialize spiral particles
@@ -57,15 +59,20 @@ function cyclone:update(dt, walls)
 
   -- Update particles
   for _, p in ipairs(self.particles) do
-    -- Calculate particle position
+    -- Calculate particle position with cyclone rotation
     local x, y
     if p.type == "spiral" then
       local radius = p.baseRadius + math.sin(self.time * 3 + p.height * 0.1) * 5
-      x = self.x + math.cos(p.angle) * radius
-      y = self.y - p.height
+      local localX = math.cos(p.angle) * radius
+      local localY = -p.height
+      -- Apply cyclone rotation
+      x = self.x + (localX * math.cos(self.rotation) - localY * math.sin(self.rotation))
+      y = self.y + (localX * math.sin(self.rotation) + localY * math.cos(self.rotation))
     else
-      x = self.x + p.offsetX + math.sin(self.time * 2 + p.height * 0.05) * 3
-      y = self.y - p.height + p.offsetY
+      local localX = p.offsetX + math.sin(self.time * 2 + p.height * 0.05) * 3
+      local localY = -p.height + p.offsetY
+      x = self.x + (localX * math.cos(self.rotation) - localY * math.sin(self.rotation))
+      y = self.y + (localX * math.sin(self.rotation) + localY * math.cos(self.rotation))
     end
     
     -- Check collision with walls
@@ -180,12 +187,15 @@ function cyclone:draw()
 
     if p.type == "spiral" then
       local radius = p.baseRadius + math.sin(self.time * 3 + p.height * 0.1) * 5
-      x = self.x + math.cos(p.angle) * radius
-      y = self.y - p.height
+      local localX = math.cos(p.angle) * radius
+      local localY = -p.height
+      x = self.x + (localX * math.cos(self.rotation) - localY * math.sin(self.rotation))
+      y = self.y + (localX * math.sin(self.rotation) + localY * math.cos(self.rotation))
     else
-      -- Straight particles with small offset
-      x = self.x + p.offsetX + math.sin(self.time * 2 + p.height * 0.05) * 3
-      y = self.y - p.height + p.offsetY
+      local localX = p.offsetX + math.sin(self.time * 2 + p.height * 0.05) * 3
+      local localY = -p.height + p.offsetY
+      x = self.x + (localX * math.cos(self.rotation) - localY * math.sin(self.rotation))
+      y = self.y + (localX * math.sin(self.rotation) + localY * math.cos(self.rotation))
     end
 
     -- Fade particles based on height and deflection
@@ -195,9 +205,11 @@ function cyclone:draw()
     love.graphics.circle("fill", x, y, p.size)
   end
 
-  -- Draw base shadow
+  -- Draw base shadow, rotated
   love.graphics.setColor(0.2, 0.2, 0.3, 0.3)
-  love.graphics.ellipse("fill", self.x, self.y + 5, self.baseRadius * 1.5, self.baseRadius * 0.5)
+  local shadowX = self.x + math.cos(self.rotation) * 5
+  local shadowY = self.y + math.sin(self.rotation) * 5
+  love.graphics.ellipse("fill", shadowX, shadowY, self.baseRadius * 1.5, self.baseRadius * 0.5, self.rotation)
 end
 
 return cyclone

@@ -34,14 +34,13 @@ function LightWorldManager:draw(drawFunc)
   self.world:draw(drawFunc)
 end
 
-function LightWorldManager:toggle()
-  self.enabled = not self.enabled
+
+function LightWorldManager:ToggleOn()
+    self.enabled = true
 end
 
-function LightWorldManager:keypressed(key)
-  if key == "e" then
-    self:toggle()
-  end
+function LightWorldManager:ToggleOff()
+    self.enabled = false
 end
 
 return LightWorldManager
