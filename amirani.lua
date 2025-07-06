@@ -216,6 +216,7 @@ function Amirani:debugDraw()
 end
 
 function Amirani:isGameWon()
+  _G.screamDisabled = true
   return self.showingWin
 end
 

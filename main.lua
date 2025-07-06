@@ -133,8 +133,20 @@ function love.update(dt)
       table.insert(fires, Fire:new(750, 610, { scale = 0.8, intensity = 0.8 }))
       _G.firesSpawnedForLevel4 = true
     end
+    -- Play Amirani scream every 2 seconds in level 4, unless screamDisable is set
+    if not _G.screamDisable then
+      if not _G.amiraniScreamTimer then _G.amiraniScreamTimer = 0 end
+      _G.amiraniScreamTimer = _G.amiraniScreamTimer + dt
+      if _G.amiraniScreamTimer >= 2.0 then
+        _G.amiraniScreamTimer = 0
+        if SoundManager and SoundManager.play then
+          SoundManager:play("amirani", "shoutClose1", 1.0)
+        end
+      end
+    end
   else
     _G.firesSpawnedForLevel4 = false
+    _G.amiraniScreamTimer = 0
   end
   
   -- Play Amirani shout every 15 seconds, randomly choosing a shout, but only if map is showing top right or upper part
