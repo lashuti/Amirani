@@ -1,4 +1,3 @@
-local Dog = require "dog"
 local Light = require "light"
 local LightWorldManager = require "lightworld_manager"
 local Menu = require "menu"
@@ -27,10 +26,10 @@ CurrentState = GameState.MENU
 function love.load()
   Map:load()
   Settings:load()
-  Dog:load()
   Light:load()
   LightWorldManager:load()
-  SelectMenu.load()
+    SelectMenu.load()
+  DogAnim.load()
 
   -- Load sounds and make globally accessible
   SoundManager:load()
@@ -47,13 +46,14 @@ end
 
 function love.update(dt)
   if CurrentState == GameState.MENU then
-    Menu:update(dt)
+        Menu:update(dt)
+
   elseif CurrentState == GameState.GAME then
-    Dog:update(dt)
     Light:update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
-    LevelManager.CheckCameraMoveTriggers()
+        LevelManager.CheckCameraMoveTriggers()
+    DogAnim.update(dt)
     
     -- Update fires
     for _, fire in ipairs(fires) do

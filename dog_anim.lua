@@ -12,7 +12,7 @@ local scale = 0.4 -- Default scale factor for the dog animation
 function DogAnim.load()
     frames = {}
     for i = 1, 6 do -- Change 6 to however many frames you have
-        frames[i] = love.graphics.newImage("assets/dog_anim/dog/" .. i .. ".png")
+        frames[i] = love.graphics.newImage("assets/animations/dog/" .. i .. ".png")
     end
     frameIndex = 1
     frameTimer = 0

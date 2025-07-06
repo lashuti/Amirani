@@ -160,7 +160,7 @@ SoundManager.musicVolume = 0.8
 
 function SoundManager:load()
   -- Load all sound files
-  local assets = "assets/"
+  local assets = "assets/sounds/"
 
   -- Ambiance
   self.sounds.ambiance.nature = love.audio.newSource(assets .. "nature ambaince_02.wav", "static")
