@@ -8,7 +8,7 @@ local frames = {}
 local frameIndex = 1
 local frameTimer = 0
 local frameDuration = 0.1
-local scale = 0.4
+local scale = 0.2
 
 -- Movement/logic
 Dog.x = 200
@@ -35,7 +35,6 @@ function Dog:load()
     end
     frameIndex = 1
     frameTimer = 0
-    scale = 0.4
     -- For fallback/static image
     dogImage = love.graphics.newImage("assets/dogPlaceholder.png")
 
