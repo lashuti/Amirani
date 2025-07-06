@@ -194,13 +194,22 @@ function Amirani:draw()
     love.graphics.setColor(0, 0, 0, self.winAlpha * 0.7)
     love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
 
-    -- Win image
+    -- Win image scaled to full width
     love.graphics.setColor(1, 1, 1, self.winAlpha)
-    local winScale = self.winScale
-    local winX = screenWidth / 2 - self.winImage:getWidth() * winScale / 2
-    local winY = screenHeight / 2 - self.winImage:getHeight() * winScale / 2 + (self.winY or 0)
+    
+    -- Calculate scale to fit screen width
+    local imageWidth = self.winImage:getWidth()
+    local imageHeight = self.winImage:getHeight()
+    local targetScale = screenWidth / imageWidth
+    
+    -- Apply animated scale effect
+    local animatedScale = targetScale * self.winScale
+    
+    -- Center the image
+    local winX = screenWidth / 2 - imageWidth * animatedScale / 2
+    local winY = screenHeight / 2 - imageHeight * animatedScale / 2 + (self.winY or 0)
 
-    love.graphics.draw(self.winImage, winX, winY, 0, winScale, winScale)
+    love.graphics.draw(self.winImage, winX, winY, 0, animatedScale, animatedScale)
 
     love.graphics.setColor(1, 1, 1, 1)
   end
