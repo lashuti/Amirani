@@ -168,7 +168,6 @@ function love.draw()
         for _, e in ipairs(enemies) do
           if e.active then e:draw() end
         end
-        Gun:draw()
       end
 
       Camera:detach()
@@ -180,6 +179,9 @@ function love.draw()
     -- Draw UI elements on top (not affected by lighting)
     SelectMenu.draw()
     Settings.draw_position()
+
+    Gun:draw()
+
   end
 end
 
@@ -202,7 +204,7 @@ function love.mousepressed(x, y, button)
     Menu:mousepressed(x, y, button)
   elseif CurrentState == GameState.GAME then
     SelectMenu.mousepressed(x, y, button)
-    Gun:mousepressed(x, y, button, enemies)
+    Gun:mousepressed(x, y, button, enemies, Eagle)
   end
 end
 

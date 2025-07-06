@@ -80,6 +80,12 @@ SoundManager.EAGLE = {
 }
 
 SoundManager.sounds = {
+  bird = {
+    death = nil
+  },
+  gun = {
+    shoot = nil
+  },
   eagle = {
     eagle = nil
   },
@@ -166,6 +172,30 @@ SoundManager.ambientVolume = 0.7
 SoundManager.musicVolume = 0.8
 
 function SoundManager:load()
+  -- Bird death
+  self.sounds.bird.death = love.audio.newSource("assets/sounds/birdDeath.mp3", "static")
+function SoundManager:playBirdDeath(volume, pitch)
+  local sound = self.sounds.bird and self.sounds.bird.death
+  local source = sound:clone()
+  source:setVolume((volume or 1.0) * self.sfxVolume * self.masterVolume)
+  source:setPitch(pitch or 1.0)
+  source:play()
+  return source
+end
+  -- Gun
+  self.sounds.gun.shoot = love.audio.newSource("assets/sounds/gunshoot.mp3", "static")
+function SoundManager:playGunShoot(volume, pitch)
+  local sound = self.sounds.gun and self.sounds.gun.shoot
+  if not sound then
+    print("Warning: Gun shoot sound not found")
+    return
+  end
+  local source = sound:clone()
+  source:setVolume((volume or 1.0) * self.sfxVolume * self.masterVolume)
+  source:setPitch(pitch or 1.0)
+  source:play()
+  return source
+end
   -- Load all sound files
   local assets = "assets/sounds/"
   -- Eagle
@@ -249,10 +279,6 @@ end
 
 function SoundManager:playEagle(volume, pitch)
   local sound = self.sounds.eagle and self.sounds.eagle.eagle
-  if not sound then
-    print("Warning: Eagle sound not found")
-    return
-  end
   local source = sound:clone()
   source:setVolume((volume or 1.0) * self.sfxVolume * self.masterVolume)
   source:setPitch(pitch or 1.0)
