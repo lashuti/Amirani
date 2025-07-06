@@ -8,7 +8,9 @@ local LevelManager = require "levelManager"
 local Settings = require "settings"
 local Map = require "map"
 local SoundManager = require "sound_manager"
+local Fire = require "fire"
 
+local fires = {}
 
 GameState = {
   MENU = "menu",
@@ -32,6 +34,11 @@ function love.load()
   
   -- Start ambient nature sound as background music
   SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
+  
+  -- Create 3 fire elements for testing
+  table.insert(fires, Fire:new(200, 400, {scale = 1.0, intensity = 1.0}))
+  table.insert(fires, Fire:new(500, 450, {scale = 1.2, intensity = 1.3}))
+  table.insert(fires, Fire:new(800, 380, {scale = 0.8, intensity = 0.8}))
 end
 
 function love.update(dt)
@@ -43,6 +50,11 @@ function love.update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
     LevelManager.CheckCameraMoveTriggers()
+    
+    -- Update fires
+    for _, fire in ipairs(fires) do
+      fire:update(dt)
+    end
   end
 end
 
@@ -54,6 +66,12 @@ function love.draw()
     LightWorldManager:draw(function()
       Camera:attach()
       Map:draw()
+      
+      -- Draw fires
+      for _, fire in ipairs(fires) do
+        fire:draw()
+      end
+      
       Dog:draw()
       Camera:detach()
     end)
