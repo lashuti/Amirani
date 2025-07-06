@@ -14,6 +14,8 @@ local Cyclone = require "cyclone"
 local fires = {}
 local cyclone
 
+local DogAnim = require "dog_anim"
+
 GameState = {
   MENU = "menu",
   GAME = "game",
@@ -33,17 +35,14 @@ function love.load()
   -- Load sounds and make globally accessible
   SoundManager:load()
   _G.SoundManager = SoundManager
-
+  
   -- Start ambient nature sound as background music
   SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
-
+  
   -- Create 3 fire elements for testing
-  table.insert(fires, Fire:new(200, 400, { scale = 1.0, intensity = 1.0 }))
-  table.insert(fires, Fire:new(500, 450, { scale = 1.2, intensity = 1.3 }))
-  table.insert(fires, Fire:new(800, 380, { scale = 0.8, intensity = 0.8 }))
-
-  -- Create a cyclone
-  cyclone = Cyclone.new(600, 500)
+  table.insert(fires, Fire:new(200, 400, {scale = 1.0, intensity = 1.0}))
+  table.insert(fires, Fire:new(500, 450, {scale = 1.2, intensity = 1.3}))
+  table.insert(fires, Fire:new(800, 380, {scale = 0.8, intensity = 0.8}))
 end
 
 function love.update(dt)
@@ -55,7 +54,7 @@ function love.update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
     LevelManager.CheckCameraMoveTriggers()
-
+    
     -- Update fires
     for _, fire in ipairs(fires) do
       fire:update(dt)
@@ -73,8 +72,9 @@ end
 function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
+
   elseif CurrentState == GameState.GAME then
-    -- Draw everything with light_world
+    DogAnim.draw(30, 30)
     LightWorldManager:draw(function()
       Camera:attach()
       Map:draw()
@@ -89,7 +89,9 @@ function love.draw()
         fire:draw()
       end
 
-      Dog:draw()
+      -- Draw dog animation at (100, 100)
+      DogAnim.draw(100, 100, 0.4)
+
       Camera:detach()
     end)
 
@@ -113,15 +115,7 @@ function love.mousepressed(x, y, button)
   if CurrentState == GameState.MENU then
     Menu:mousepressed(x, y, button)
   elseif CurrentState == GameState.GAME then
-    -- Check if clicking on test object
-    if button == 1 and testObject and x >= testObject.x and x <= testObject.x + testObject.width and
-        y >= testObject.y and y <= testObject.y + testObject.height then
-      testObject.isDragging = true
-      testObject.vx = 0
-      testObject.vy = 0
-    else
-      SelectMenu.mousepressed(x, y, button)
-    end
+    SelectMenu.mousepressed(x, y, button)
   end
 end
 

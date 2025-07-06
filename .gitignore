@@ -1,0 +1,8 @@
+# Ignore Dear ImGui and VSCode config files
+.dear/
+.vscode/
+*.dear
+*.vscode
+# Ignore all XML files
+*.xml
+*.iml
