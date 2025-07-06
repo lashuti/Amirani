@@ -19,6 +19,9 @@ local FireExtinguishEffect = require "fire_extinguish_effect"
 
 local fires = {}
 local cyclone
+local pits = {}
+local dustEffects = {}
+local fireExtinguishEffects = {}
 local steamEffects = {}
 
 local SteamEffect = require "steam_effect"
@@ -97,7 +100,6 @@ function love.update(dt)
       end
     end
 
-    if cyclone and cyclone.update then
     -- Update steam effects
     for i = #steamEffects, 1, -1 do
       local steam = steamEffects[i]
@@ -110,7 +112,7 @@ function love.update(dt)
     end
 
     -- Update cyclone with wall collision
-    if cyclone then
+    if cyclone and cyclone.update then
       -- Get walls from select menu
       local walls = SelectMenu.getWalls and SelectMenu.getWalls() or {}
       cyclone:update(dt, walls)
@@ -181,8 +183,6 @@ function love.update(dt)
             -- Play water evaporation sound
             if SoundManager and SoundManager.play then
               SoundManager:play("lava", "waterEvaporate", 0.8)
-            if SoundManager and SoundManager.playWaterOnFire then
-              SoundManager:playWaterOnFire(0.8)
             end
             break -- One droplet can only hit one fire
           end
@@ -235,6 +235,8 @@ function love.draw()
       -- Draw fire extinguish effects
       for _, effect in ipairs(fireExtinguishEffects) do
         effect:draw()
+      end
+      
       -- Draw steam effects
       for _, steam in ipairs(steamEffects) do
         steam:draw()
