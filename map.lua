@@ -2,7 +2,7 @@
 local map = {}
 
 -- Default configuration
-map.imagePath = "assets/backgroundTemp.jpg"
+map.imagePath = "assets/map.png"
 map.background = nil
 
 -- Function to load background image
@@ -68,7 +68,15 @@ end
 
 function map:draw()
     love.graphics.setColor(1, 1, 1, 1) -- Reset color to white (important if you use tinting elsewhere)
-    love.graphics.draw(background, 0, 0)
+    local scaleMultiplier = 0.55
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+    local bgWidth = background:getWidth()
+    local bgHeight = background:getHeight()
+    local scaleX = screenWidth / (bgWidth * scaleMultiplier)
+    local scaleY = screenHeight / (bgHeight * scaleMultiplier)
+    -- Draw so that the bottom left of the image is at (0, screenHeight)
+    love.graphics.draw(background, 0, screenHeight - bgHeight * scaleY, 0, scaleX, scaleY)
 end
 
 -- Function to set a new image path

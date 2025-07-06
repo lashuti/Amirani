@@ -8,11 +8,11 @@ local frames = {}
 local frameIndex = 1
 local frameTimer = 0
 local frameDuration = 0.1
-local scale = 0.2
+local scale = 0.1
 
 -- Movement/logic
-Dog.x = 200
-Dog.y = 200
+Dog.x = 0
+Dog.y = 300
 Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
@@ -20,10 +20,12 @@ Dog.angle = 0
 Dog.speed = 120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
-    { x = 400, y = 200 },
-    { x = 400, y = 500 },
-    { x = 300, y = 400 },
-    { x = 200, y = 100 }
+    { x = 10, y = 320 },
+    { x = 330, y = 305 },
+    { x = 440, y = 540 },
+    { x = 900, y = 520 },
+    { x = 1000, y = 340 },
+    { x = 680, y = 20 }
 }
 Dog.currentTarget = 1
 
@@ -58,28 +60,24 @@ function Dog:update(dt)
             frameIndex = 1
         end
     end
-    -- Movement
+    -- Movement (diagonal allowed)
     local target = self:_getTarget()
     local dx = target.x - self.x
     local dy = target.y - self.y
     local distance = math.sqrt(dx * dx + dy * dy)
 
-    -- Only move left/right or up/down, no rotation
-    if math.abs(dx) > 1 then
-        if dx > 0 then
-            self.x = self.x + self.speed * dt
+    if distance > 1 then
+        -- Normalize direction
+        local dirX = dx / distance
+        local dirY = dy / distance
+        self.x = self.x + dirX * self.speed * dt
+        self.y = self.y + dirY * self.speed * dt
+        -- Set angle for left/right facing
+        if dirX > 0 then
             self.angle = math.pi -- face right (flipped)
         else
-            self.x = self.x - self.speed * dt
             self.angle = 0 -- face left (default)
         end
-    elseif math.abs(dy) > 1 then
-        if dy > 0 then
-            self.y = self.y + self.speed * dt
-        else
-            self.y = self.y - self.speed * dt
-        end
-        -- keep angle unchanged when moving vertically
     end
 
     self:_getCurrentPriorityTarget(distance)
@@ -106,7 +104,33 @@ function Dog:_getCurrentPriorityTarget(distance)
     end
 end
 
-    function Dog:draw(s)
+function Dog:draw(s)
+    -- Draw a shadow by drawing the dog image/animation in black, slightly offset and squashed
+    local shadowOffsetY = self.height * 0.40
+    local shadowScaleY = 0.45 * (s or scale or 1)
+    local shadowAlpha = 0.45
+    if #frames > 0 then
+        love.graphics.push()
+        love.graphics.translate(self.x, self.y + shadowOffsetY)
+        local flip = 1
+        local drawAngle = 0
+        local ox = -(self.width/2)
+        if self.angle == math.pi then
+            flip = -1
+            ox = self.width/2
+        end
+        love.graphics.setColor(0, 0, 0, shadowAlpha)
+        love.graphics.draw(frames[frameIndex], ox, -(self.height/2), drawAngle, (s or scale) * flip, shadowScaleY)
+        love.graphics.pop()
+    else
+        love.graphics.push()
+        love.graphics.translate(self.x, self.y + shadowOffsetY)
+        love.graphics.rotate(self.angle)
+        love.graphics.setColor(0, 0, 0, shadowAlpha)
+        love.graphics.draw(dogImage, -self.width / 2, -self.height / 2, 0, self.imageScale, shadowScaleY)
+        love.graphics.pop()
+    end
+
     -- Draw animated dog if frames exist, else fallback to static image
     if #frames > 0 then
         love.graphics.push()

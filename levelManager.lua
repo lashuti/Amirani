@@ -1,8 +1,8 @@
 local LevelManager = {}
 
 local triggers = {
-  {x = 1280, y = 0, w = 50, h = 720, dx = 1, dy = 0}, -- right edge trigger
-  {x = 0, y = 0, w = 50, h = 720, dx = -1, dy = 0},    -- left edge trigger
+  --{x = 1280, y = 0, w = 50, h = 720, dx = 1, dy = 0}, -- right edge trigger
+  --{x = 0, y = 0, w = 50, h = 720, dx = -1, dy = 0},    -- left edge trigger
   -- Add more triggers as needed
 }
 

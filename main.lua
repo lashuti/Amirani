@@ -38,6 +38,21 @@ CurrentState = GameState.MENU
 function love.load()
 
   Map:load()
+  -- Set camera to show the bottom left part of the map at the start
+  if Map.getDimensions then
+    local mapWidth, mapHeight = Map:getDimensions()
+    -- Camera should start at (0, mapHeight - screenHeight)
+    local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
+    -- Clamp to map bounds if needed
+    local camX = 0
+    local camY = math.max(0, (mapHeight or 0) - (screenHeight or 0))
+    if Camera and Camera.setPosition then
+      Camera:setPosition(camX, camY)
+    elseif Camera then
+      Camera.x = camX
+      Camera.y = camY
+    end
+  end
   Settings:load()
   Light:load()
   LightWorldManager:load()
@@ -260,7 +275,7 @@ function love.draw()
 
     -- Draw UI elements on top (not affected by lighting)
     SelectMenu.draw()
-    Settings.draw_position()
+    Settings:draw_position()
 
     Gun:draw()
 
@@ -292,19 +307,14 @@ end
 
 function love.mousereleased(x, y, button)
   if CurrentState == GameState.GAME then
-    if button == 1 and testObject and testObject.isDragging then
-      testObject.isDragging = false
-    end
+    -- Removed testObject drag logic (testObject is undefined)
     SelectMenu.mousereleased(x, y, button)
   end
 end
 
 function love.mousemoved(x, y, dx, dy)
   if CurrentState == GameState.GAME then
-    if testObject and testObject.isDragging then
-      testObject.x = x - testObject.width / 2
-      testObject.y = y - testObject.height / 2
-    end
+    -- Removed testObject drag logic (testObject is undefined)
     SelectMenu.mousemoved(x, y, dx, dy)
   end
 end
