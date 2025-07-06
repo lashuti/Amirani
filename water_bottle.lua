@@ -19,7 +19,9 @@ function waterBottle.new(x, y)
         shakeHistory = {},
         maxShakeHistory = 10,
         spillThreshold = 400,
-        droplets = {}
+        droplets = {},
+        lastSoundTime = 0,
+        soundCooldown = 0.3  -- Minimum time between splash sounds
     }
     
     self.update = waterBottle.update
@@ -60,6 +62,14 @@ function waterBottle:update(dt)
             -- Spill water if shaking too much
             if avgShake > self.spillThreshold and self.waterLevel > 0 then
                 self:spill()
+                
+                -- Play water splash sound when water comes out (with cooldown)
+                local currentTime = love.timer.getTime()
+                if SoundManager and SoundManager.play and 
+                   (currentTime - self.lastSoundTime) >= self.soundCooldown then
+                    SoundManager:play("water", "splash2", 0.6)  -- water splash_02.wav
+                    self.lastSoundTime = currentTime
+                end
             end
             
             local targetRotation = math.atan2(self.velocityX, -self.velocityY) * 0.2

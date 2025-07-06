@@ -296,6 +296,12 @@ function SoundManager:stopAllLoops()
   self.activeLoops = {}
 end
 
+-- Helper function to play random sounds
+function SoundManager:playRandom(category, soundPrefix, count, volume)
+  local soundName = soundPrefix .. math.random(1, count)
+  return self:play(category, soundName, volume)
+end
+
 -- Convenience functions for common sounds
 function SoundManager:playDogBark(volume)
   return self:playRandom("dog", "bark", 5, volume)
@@ -309,6 +315,11 @@ function SoundManager:playBottleShake(volume)
   local shakes = { "bottleShake1", "bottleShake2", "bottleShake3", "bottleShake4", "bottleShake5", "bottleShake6" }
   local shake = shakes[math.random(1, #shakes)]
   return self:play("water", shake, volume)
+end
+
+function SoundManager:playWaterOnFire(volume)
+  -- Play the water evaporation sound when water hits fire
+  return self:play("lava", "waterEvaporate", volume or 0.8)
 end
 
 function SoundManager:playAmiraniShout(distance)
