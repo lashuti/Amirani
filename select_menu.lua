@@ -466,21 +466,6 @@ function select_menu.getWaterBottles()
   return waterBottles
 end
 
--- Get all sand items (for collision detection)
-function select_menu.getSandItems()
-  return sandItems
-end
-
--- Remove a sand item
-function select_menu.removeSandItem(sandToRemove)
-  for i = #sandItems, 1, -1 do
-    if sandItems[i] == sandToRemove then
-      table.remove(sandItems, i)
-      break
-    end
-  end
-end
-
 -- Handle keyboard input for rotation
 function select_menu.keypressed(key)
   if draggingItem and wallPreview then

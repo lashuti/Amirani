@@ -1,3 +1,7 @@
+local Gun = require "gun"
+local Eagle = require "eagle"
+local enemies = {}
+
 local Light = require "light"
 local LightWorldManager = require "lightworld_manager"
 local Menu = require "menu"
@@ -15,10 +19,9 @@ local FireExtinguishEffect = require "fire_extinguish_effect"
 
 local fires = {}
 local cyclone
-local pits = {}
-local dustEffects = {}
-local fireExtinguishEffects = {}
+local steamEffects = {}
 
+local SteamEffect = require "steam_effect"
 local Dog = require "dog"
 
 GameState = {
@@ -30,13 +33,15 @@ GameState = {
 CurrentState = GameState.MENU
 
 function love.load()
+
   Map:load()
   Settings:load()
   Light:load()
   LightWorldManager:load()
   SelectMenu.load()
   Dog:load()
-
+  Gun:load()
+  Eagle:load()
   -- Load sounds and make globally accessible
   SoundManager:load()
   _G.SoundManager = SoundManager
@@ -67,6 +72,8 @@ function love.update(dt)
     LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
 
+    Eagle:update(dt, Dog.x, Dog.y)
+    -- Update fires
     for _, fire in ipairs(fires) do
       fire:update(dt)
     end
@@ -91,6 +98,20 @@ function love.update(dt)
     end
 
     if cyclone and cyclone.update then
+    -- Update steam effects
+    for i = #steamEffects, 1, -1 do
+      local steam = steamEffects[i]
+      steam:update(dt)
+
+      -- Remove finished steam effects
+      if steam:isDone() then
+        table.remove(steamEffects, i)
+      end
+    end
+
+    -- Update cyclone with wall collision
+    if cyclone then
+      -- Get walls from select menu
       local walls = SelectMenu.getWalls and SelectMenu.getWalls() or {}
       cyclone:update(dt, walls)
     end
@@ -147,6 +168,10 @@ function love.update(dt)
             local extinguishEffect = FireExtinguishEffect:new(fire.x, fire.y, { duration = 1.5 })
             table.insert(fireExtinguishEffects, extinguishEffect)
             
+            -- Create steam effect at fire position
+            local steam = SteamEffect:new(fire.x, fire.y, { duration = 3.0 })
+            table.insert(steamEffects, steam)
+
             -- Destroy the fire
             fire:destroy()
             table.remove(fires, fireIndex)
@@ -156,6 +181,8 @@ function love.update(dt)
             -- Play water evaporation sound
             if SoundManager and SoundManager.play then
               SoundManager:play("lava", "waterEvaporate", 0.8)
+            if SoundManager and SoundManager.playWaterOnFire then
+              SoundManager:playWaterOnFire(0.8)
             end
             break -- One droplet can only hit one fire
           end
@@ -188,6 +215,7 @@ function love.draw()
         pit:draw()
       end
 
+      Eagle:draw()
       -- Draw cyclone
       if cyclone and cyclone.draw then
         cyclone:draw()
@@ -207,10 +235,21 @@ function love.draw()
       -- Draw fire extinguish effects
       for _, effect in ipairs(fireExtinguishEffects) do
         effect:draw()
+      -- Draw steam effects
+      for _, steam in ipairs(steamEffects) do
+        steam:draw()
       end
 
       -- Draw the dog animation on the map
       Dog:draw()
+
+      -- Draw enemy eagles
+      if CurrentState == GameState.GAME then
+        for _, e in ipairs(enemies) do
+          if e.active then e:draw() end
+        end
+        Gun:draw()
+      end
 
       Camera:detach()
     end)
@@ -225,6 +264,13 @@ function love.draw()
 end
 
 function love.keypressed(key)
+  -- TODO instead of G make it a button in the menu
+  if key == 'g' and CurrentState == GameState.GAME then
+    if Gun.active then Gun:deactivate() else Gun:activate() end
+  end
+  if key == 'r' and CurrentState == GameState.GAME then
+    Eagle:activate(Dog.x, Dog.y)
+  end
   if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
     LightWorldManager:keypressed(key)                                             -- Use light_world instead
     SelectMenu.keypressed(key)                                                    -- Handle wall rotation
@@ -236,6 +282,7 @@ function love.mousepressed(x, y, button)
     Menu:mousepressed(x, y, button)
   elseif CurrentState == GameState.GAME then
     SelectMenu.mousepressed(x, y, button)
+    Gun:mousepressed(x, y, button, enemies)
   end
 end
 

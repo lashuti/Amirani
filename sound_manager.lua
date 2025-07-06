@@ -75,7 +75,14 @@ SoundManager.AMIRANI_SOUND = {
   SHOUT_FAR = "shoutFar"
 }
 
+SoundManager.EAGLE = {
+  EAGLE = "eagle"
+}
+
 SoundManager.sounds = {
+  eagle = {
+    eagle = nil
+  },
   -- Ambiance & Environmental
   ambiance = {
     nature = nil,
@@ -161,6 +168,8 @@ SoundManager.musicVolume = 0.8
 function SoundManager:load()
   -- Load all sound files
   local assets = "assets/sounds/"
+  -- Eagle
+  self.sounds.eagle.eagle = love.audio.newSource(assets .. "eagle.mp3", "static")
 
   -- Ambiance
   self.sounds.ambiance.nature = love.audio.newSource(assets .. "nature ambaince_02.wav", "static")
@@ -238,6 +247,19 @@ function SoundManager:load()
   self.sounds.dog.footstep3:setLooping(true)
 end
 
+function SoundManager:playEagle(volume, pitch)
+  local sound = self.sounds.eagle and self.sounds.eagle.eagle
+  if not sound then
+    print("Warning: Eagle sound not found")
+    return
+  end
+  local source = sound:clone()
+  source:setVolume((volume or 1.0) * self.sfxVolume * self.masterVolume)
+  source:setPitch(pitch or 1.0)
+  source:play()
+  return source
+end
+
 function SoundManager:play(category, soundName, volume, pitch)
   local sound = self.sounds[category] and self.sounds[category][soundName]
   if not sound then
@@ -296,6 +318,12 @@ function SoundManager:stopAllLoops()
   self.activeLoops = {}
 end
 
+-- Helper function to play random sounds
+function SoundManager:playRandom(category, soundPrefix, count, volume)
+  local soundName = soundPrefix .. math.random(1, count)
+  return self:play(category, soundName, volume)
+end
+
 -- Convenience functions for common sounds
 function SoundManager:playDogBark(volume)
   return self:playRandom("dog", "bark", 5, volume)
@@ -309,6 +337,11 @@ function SoundManager:playBottleShake(volume)
   local shakes = { "bottleShake1", "bottleShake2", "bottleShake3", "bottleShake4", "bottleShake5", "bottleShake6" }
   local shake = shakes[math.random(1, #shakes)]
   return self:play("water", shake, volume)
+end
+
+function SoundManager:playWaterOnFire(volume)
+  -- Play the water evaporation sound when water hits fire
+  return self:play("lava", "waterEvaporate", volume or 0.8)
 end
 
 function SoundManager:playAmiraniShout(distance)
