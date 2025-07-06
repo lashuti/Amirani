@@ -134,7 +134,7 @@ function love.update(dt)
       _G.firesSpawnedForLevel4 = true
     end
     -- Play Amirani scream every 2 seconds in level 4, unless screamDisable is set
-    if not _G.screamDisable then
+    if not _G.screamDisabled then
       if not _G.amiraniScreamTimer then _G.amiraniScreamTimer = 0 end
       _G.amiraniScreamTimer = _G.amiraniScreamTimer + dt
       if _G.amiraniScreamTimer >= 2.0 then
