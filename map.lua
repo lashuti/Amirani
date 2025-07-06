@@ -1,6 +1,9 @@
 -- Map module for loading and managing background images
 local map = {}
 
+-- Track if we should show the top right part of the map
+map.showTopRight = false
+
 -- Track if we should show the upper part of the map
 map.showUpperPart = false
 
@@ -82,6 +85,19 @@ function map:draw()
         scaleX = screenWidth / bgWidth
         scaleY = screenHeight / bgHeight
         drawY = 0
+        love.graphics.draw(background, 0, drawY, 0, scaleX, scaleY)
+    elseif map.showTopRight then
+        -- Show the true top right corner of the map (right edge flush with screen)
+        local scaleMultiplier = 0.55
+        scaleX = screenWidth / (bgWidth * scaleMultiplier)
+        scaleY = screenHeight / (bgHeight * scaleMultiplier)
+        -- Align the right edge of the map with the right edge of the screen
+        local drawX = screenWidth - bgWidth * scaleX
+        if drawX > 0 then drawX = 0 end
+        -- Optionally shift down if you want more bottom
+        local yShift = bgHeight * scaleY * 0.17
+        local drawY = -yShift
+        love.graphics.draw(background, drawX, drawY, 0, scaleX, scaleY)
     else
         local scaleMultiplier = 0.55
         scaleX = screenWidth / (bgWidth * scaleMultiplier)
@@ -95,8 +111,8 @@ function map:draw()
         else
             drawY = screenHeight - bgHeight * scaleY
         end
+        love.graphics.draw(background, 0, drawY, 0, scaleX, scaleY)
     end
-    love.graphics.draw(background, 0, drawY, 0, scaleX, scaleY)
 end
 
 -- Function to set a new image path
@@ -104,6 +120,7 @@ function map:setImagePath(newPath)
     self.imagePath = newPath
     -- Reset scale logic if needed
     self.showUpperPart = false
+    self.showTopRight = false
 end
 
 -- Function to reload with current or new path

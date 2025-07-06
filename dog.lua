@@ -18,7 +18,7 @@ Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 350--120
+Dog.speed = 800 --120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
     { x = 10, y = 320 },
@@ -29,6 +29,13 @@ Dog.targets = {
     { x = 680, y = 0 },
     { x = 480, y = 420 },
     { x = 670, y = 120 },
+    { x = 1, y = 200 },
+    { x = 157, y = 216 },
+    { x = 400, y = 366 },
+    { x = 777, y = 333 },
+    { x = 1000, y = 333 },
+    { x = 1140, y = 420 },
+    { x = 1280, y = 600 },
 }
 Dog.currentTarget = 1
 
@@ -54,6 +61,15 @@ function Dog:load()
 end
 
 function Dog:update(dt)
+    -- Switch back to map.png and show top right when dog reaches (1280, 600)
+    if math.abs(self.x - 1280) < 15 and math.abs(self.y - 600) < 15 then
+        if Map and Map.setImagePath then
+            Map:setImagePath("assets/map.png")
+            if Map.reload then Map:reload() end
+            -- Show top right: set a new flag for this state
+            Map.showTopRight = true
+        end
+    end
     -- Switch to LIGHT_LEVEL and dark background when dog reaches (670, 120)
     if CurrentState == GameState.GAME then
         if math.abs(self.x - 670) < 15 and math.abs(self.y - 120) < 15 then
@@ -61,7 +77,22 @@ function Dog:update(dt)
                 Map:setImagePath("assets/darkLevelBg.png")
                 if Map.reload then Map:reload() end
             end
-
+            -- Move dog to visible position and advance to next target
+            self.x = 30
+            self.y = 180
+            self.currentTarget = self.currentTarget % #self.targets + 1
+        end
+        -- Switch back to map and show top right when dog reaches (1280, 600)
+        if math.abs(self.x - 1280) < 15 and math.abs(self.y - 600) < 15 then
+            if Map and Map.setImagePath then
+                Map:setImagePath("assets/map.png")
+                if Map.reload then Map:reload() end
+                if Map then
+                    Map.showTopRight = true
+                    Map.showUpperPart = false -- reset other flags
+                end
+            end
+            self.currentTarget = self.currentTarget % #self.targets + 1
         end
     end
     -- Animation
