@@ -1,3 +1,9 @@
+local Gun = require "gun"
+local enemies = {
+  {x = 600, y = 300, width = 40, height = 40},
+  {x = 700, y = 350, width = 40, height = 40},
+  {x = 800, y = 250, width = 40, height = 40},
+}
 local Light = require "light"
 local LightWorldManager = require "lightworld_manager"
 local Menu = require "menu"
@@ -24,12 +30,14 @@ GameState = {
 CurrentState = GameState.MENU
 
 function love.load()
+
   Map:load()
   Settings:load()
   Light:load()
   LightWorldManager:load()
-    SelectMenu.load()
+  SelectMenu.load()
   Dog:load()
+  Gun:load()
 
   -- Load sounds and make globally accessible
   SoundManager:load()
@@ -52,7 +60,7 @@ function love.update(dt)
     Light:update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
-        LevelManager.CheckCameraMoveTriggers()
+    LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
     
     -- Update fires
@@ -70,6 +78,7 @@ function love.update(dt)
 end
 
 function love.draw()
+
   if CurrentState == GameState.MENU then
     Menu:draw()
 
@@ -91,6 +100,14 @@ function love.draw()
       -- Draw the dog animation on the map
       Dog:draw()
 
+      --temp enemy draw TODO delete
+      for _, e in ipairs(enemies) do
+      love.graphics.setColor(1, 0, 0)
+      love.graphics.rectangle('fill', e.x, e.y, e.width, e.height)
+      love.graphics.setColor(1, 1, 1)
+    end
+      Gun:draw()
+
       Camera:detach()
     end)
 
@@ -104,6 +121,10 @@ function love.draw()
 end
 
 function love.keypressed(key)
+  -- TODO instead of G make it a button in the menu
+  if key == 'g' and CurrentState == GameState.GAME then
+    if Gun.active then Gun:deactivate() else Gun:activate() end
+  end
   if CurrentState == GameState.LIGHT_LEVEL or CurrentState == GameState.GAME then --Temp. make only light level in future
     LightWorldManager:keypressed(key)                                             -- Use light_world instead
     SelectMenu.keypressed(key)                                                    -- Handle wall rotation
@@ -115,6 +136,7 @@ function love.mousepressed(x, y, button)
     Menu:mousepressed(x, y, button)
   elseif CurrentState == GameState.GAME then
     SelectMenu.mousepressed(x, y, button)
+    Gun:mousepressed(x, y, button, enemies)
   end
 end
 
