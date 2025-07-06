@@ -51,29 +51,94 @@ function cyclone.new(x, y)
   return self
 end
 
-function cyclone:update(dt)
+function cyclone:update(dt, walls)
   self.time = self.time + dt
+  walls = walls or {}
 
   -- Update particles
   for _, p in ipairs(self.particles) do
+    -- Calculate particle position
+    local x, y
     if p.type == "spiral" then
-      p.angle = p.angle + p.speed * dt
-      -- Make particles rise (increase height)
-      p.height = p.height + 80 * dt
-      if p.height > self.height then
+      local radius = p.baseRadius + math.sin(self.time * 3 + p.height * 0.1) * 5
+      x = self.x + math.cos(p.angle) * radius
+      y = self.y - p.height
+    else
+      x = self.x + p.offsetX + math.sin(self.time * 2 + p.height * 0.05) * 3
+      y = self.y - p.height + p.offsetY
+    end
+    
+    -- Check collision with walls
+    local blocked = false
+    local deflectAngle = 0
+    
+    for _, wall in ipairs(walls) do
+      if wall.checkCollision and wall:checkCollision(x, y, p.size) then
+        blocked = true
+        -- Calculate deflection angle based on wall rotation
+        deflectAngle = wall.rotation
+        break
+      end
+    end
+    
+    if blocked then
+      -- Particle is blocked by wall, deflect it diagonally
+      if not p.deflected then
+        p.deflected = true
+        p.deflectTime = 0
+        p.deflectAngle = deflectAngle
+        -- Choose left or right deflection randomly
+        p.deflectDirection = math.random() < 0.5 and -1 or 1
+      end
+    end
+    
+    -- Update particle movement
+    if p.deflected then
+      p.deflectTime = p.deflectTime + dt
+      
+      -- Move particle diagonally away from wall
+      local deflectSpeed = 100 + p.deflectTime * 50
+      local angle = p.deflectAngle + (math.pi/2) * p.deflectDirection
+      
+      if p.type == "spiral" then
+        p.baseRadius = p.baseRadius + math.cos(angle) * deflectSpeed * dt
+        p.height = p.height + math.sin(angle) * deflectSpeed * dt * 0.3
+      else
+        p.offsetX = p.offsetX + math.cos(angle) * deflectSpeed * dt
+        p.offsetY = p.offsetY + math.sin(angle) * deflectSpeed * dt * 0.3
+      end
+      
+      -- Fade out deflected particles
+      p.alpha = math.max(0, (p.alpha or 1) - dt * 0.5)
+      
+      -- Reset particle when it fades out completely
+      if p.alpha <= 0 then
         p.height = 0
         p.angle = math.random() * math.pi * 2
-      end
-      -- Update radius based on height
-      p.baseRadius = self.baseRadius + (self.topRadius - self.baseRadius) * (p.height / self.height)
-    else
-      -- Straight particles
-      p.angle = p.angle + p.speed * dt
-      p.height = p.height + 120 * dt -- Rise faster
-      if p.height > self.height then
-        p.height = 0
+        p.baseRadius = self.baseRadius
         p.offsetX = (math.random() - 0.5) * 20
         p.offsetY = (math.random() - 0.5) * 10
+        p.deflected = false
+        p.alpha = p.type == "spiral" and (0.3 + math.random() * 0.3) or (0.4 + math.random() * 0.3)
+      end
+    else
+      -- Normal particle movement
+      if p.type == "spiral" then
+        p.angle = p.angle + p.speed * dt
+        p.height = p.height + 80 * dt
+        if p.height > self.height then
+          p.height = 0
+          p.angle = math.random() * math.pi * 2
+        end
+        p.baseRadius = self.baseRadius + (self.topRadius - self.baseRadius) * (p.height / self.height)
+      else
+        p.angle = p.angle + p.speed * dt
+        p.height = p.height + 120 * dt
+        if p.height > self.height then
+          p.height = 0
+          p.offsetX = (math.random() - 0.5) * 20
+          p.offsetY = (math.random() - 0.5) * 10
+        end
       end
     end
   end
@@ -123,9 +188,10 @@ function cyclone:draw()
       y = self.y - p.height + p.offsetY
     end
 
-    -- Fade particles based on height
+    -- Fade particles based on height and deflection
     local heightAlpha = 1 - (p.height / self.height) * 0.5
-    love.graphics.setColor(0.7, 0.7, 0.9, p.alpha * heightAlpha)
+    local particleAlpha = p.alpha or (p.type == "spiral" and 0.3 or 0.4)
+    love.graphics.setColor(0.7, 0.7, 0.9, particleAlpha * heightAlpha)
     love.graphics.circle("fill", x, y, p.size)
   end
 
