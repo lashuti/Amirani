@@ -86,11 +86,16 @@ end
 
 -- Remove all walls if level 3 and activeWall exists
 function select_menu.removeAllWallsIfLevel3(level)
-  if level == 3 and _G.activeWall ~= nil then
-    for i = #_G.walls, 1, -1 do
-      table.remove(_G.walls, i)
+  if level == 3 then
+    -- Remove all walls
+    for i = #walls, 1, -1 do
+      table.remove(walls, i)
     end
-    _G.activeWall = nil
+    activeWall = nil
+    -- Remove all placedItems
+    for i = #placedItems, 1, -1 do
+      table.remove(placedItems, i)
+    end
   end
 end
 

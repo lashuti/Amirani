@@ -21,14 +21,14 @@ Dog.width = 60
 Dog.height = 30
 Dog.imageScale = 0.2
 Dog.angle = 0
-Dog.speed = 400--120
+Dog.speed = 120
 Dog.rotationSpeed = math.rad(300)
 Dog.targets = {
     { x = 10, y = 320 },
-    { x = 330, y = 335 },
-    { x = 420, y = 540 },
+    { x = 415, y = 335 },
+    { x = 440, y = 540 },
     { x = 900, y = 520 },
-    { x = 1000, y = 340 },
+    { x = 950, y = 340 },
     { x = 680, y = 0 },
     { x = 480, y = 420 },
     { x = 670, y = 120 },
@@ -70,6 +70,29 @@ function Dog:load()
 end
 
 function Dog:update(dt)
+    -- Eagle triple activation trigger
+    if not self.eagleTripleActivated and math.abs(self.x - 900) < 15 and math.abs(self.y - 520) < 15 then
+        self.eagleTripleActivated = true
+        self.eagleTripleTimer = 0
+        self.eagleTripleCount = 0
+    end
+    if self.eagleTripleActivated then
+        self.eagleTripleTimer = (self.eagleTripleTimer or 0) + dt
+        local Eagle = require("eagle")
+        if self.eagleTripleCount == 0 and self.eagleTripleTimer >= 0 then
+            if Eagle and Eagle.activate then Eagle:activate(self.x, self.y) end
+            self.eagleTripleCount = 1
+        elseif self.eagleTripleCount == 1 and self.eagleTripleTimer >= 1.5 then
+            if Eagle and Eagle.activate then Eagle:activate(self.x, self.y) end
+            self.eagleTripleCount = 2
+        elseif self.eagleTripleCount == 2 and self.eagleTripleTimer >= 3.0 then
+            if Eagle and Eagle.activate then Eagle:activate(self.x, self.y) end
+            self.eagleTripleCount = 3
+        end
+        if self.eagleTripleCount >= 3 then
+            self.eagleTripleActivated = false
+        end
+    end
     -- Stop movement if at last target
     if self.stopped then return end
     -- Switch back to map.png and show top right when dog reaches (1280, 600)

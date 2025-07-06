@@ -1,8 +1,8 @@
 local settings = {
-    DEBUG_MODE = true,
+    DEBUG_MODE = false,
     WIDTH = 1280,
     HEIGHT = 720,
-    TITLE = "Amirani"
+    TITLE = "Amirani's Cuga"
 }
 
 function settings:load()

@@ -37,8 +37,11 @@ GameState = {
 
 CurrentState = GameState.MENU
 
+local menuBgImage
+
 function love.load()
 
+  menuBgImage = love.graphics.newImage("assets/MenuBg.png")
   Map:load()
   -- Set camera to show the bottom left part of the map at the start
   if Map.getDimensions then
@@ -75,9 +78,8 @@ function love.load()
   _G.ambianceSwitchTimer = 0
   _G.ambianceTarget = nil
 
-  -- Create pit with custom image at (620, 540)
-  local pit = Pit:new(620, 540, 50)
-  local pit2 = Pit:new(925, 120, 60)
+  local pit = Pit:new(600, 540, 50)
+  local pit2 = Pit:new(820, 540, 50)
   table.insert(pits, pit)
   table.insert(pits, pit2)
   
@@ -114,6 +116,7 @@ function love.update(dt)
     if LEVEL == 2 then
       if not _G.cycloneSpawnedForLevel2 then
         cyclone = Cyclone.new(420, 440)
+        Gun:deactivate()
         _G.cycloneSpawnedForLevel2 = true
       end
 
@@ -301,9 +304,34 @@ function love.update(dt)
   end
 end
 
+local menuTitleFont
+
 function love.draw()
   if CurrentState == GameState.MENU then
-    Menu:draw()
+    if menuBgImage then
+      love.graphics.setColor(1, 1, 1)
+      love.graphics.draw(menuBgImage, 0, 0, 0, love.graphics.getWidth() / menuBgImage:getWidth(), love.graphics.getHeight() / menuBgImage:getHeight())
+    end
+    -- Draw beautiful big title
+    if not menuTitleFont then
+      menuTitleFont = love.graphics.newFont("assets/ChunkFive-Regular.ttf", 72)
+    end
+    local prevFont = love.graphics.getFont()
+    love.graphics.setFont(menuTitleFont)
+    love.graphics.setColor(0.95, 0.8, 0.2)
+    local title = "AMIRANI'S CUGA"
+    local sw, sh = love.graphics.getWidth(), love.graphics.getHeight()
+    local tw = menuTitleFont:getWidth(title)
+    local th = menuTitleFont:getHeight()
+    -- Shadow
+    love.graphics.setColor(0.2, 0.1, 0, 0.5)
+    love.graphics.print(title, (sw-tw)/2+4, 60+4)
+    -- Main text
+    love.graphics.setColor(0.95, 0.8, 0.2)
+    love.graphics.print(title, (sw-tw)/2, 60)
+    love.graphics.setFont(prevFont)
+    love.graphics.setColor(1, 1, 1)
+
   elseif CurrentState == GameState.GAME then
     LightWorldManager:draw(function()
       Camera:attach()
