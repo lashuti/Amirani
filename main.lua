@@ -14,7 +14,6 @@ local fires = {}
 local cyclone
 local steamEffects = {}
 
-local Dog = require "dog_anim"
 local SteamEffect = require "steam_effect"
 local Dog = require "dog"
 
@@ -31,43 +30,42 @@ function love.load()
   Settings:load()
   Light:load()
   LightWorldManager:load()
-    SelectMenu.load()
+  SelectMenu.load()
   Dog:load()
 
   -- Load sounds and make globally accessible
   SoundManager:load()
   _G.SoundManager = SoundManager
-  
+
   -- Start ambient nature sound as background music
   SoundManager:startAmbiance(SoundManager.AMBIANCE.NATURE)
-  
+
   -- Create 3 fire elements for testing
-  table.insert(fires, Fire:new(200, 400, {scale = 1.0, intensity = 1.0}))
-  table.insert(fires, Fire:new(500, 450, {scale = 1.2, intensity = 1.3}))
-  table.insert(fires, Fire:new(800, 380, {scale = 0.8, intensity = 0.8}))
+  table.insert(fires, Fire:new(200, 400, { scale = 1.0, intensity = 1.0 }))
+  table.insert(fires, Fire:new(500, 450, { scale = 1.2, intensity = 1.3 }))
+  table.insert(fires, Fire:new(800, 380, { scale = 0.8, intensity = 0.8 }))
 end
 
 function love.update(dt)
   if CurrentState == GameState.MENU then
-        Menu:update(dt)
-
+    Menu:update(dt)
   elseif CurrentState == GameState.GAME then
     Light:update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
-        LevelManager.CheckCameraMoveTriggers()
+    LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
-    
+
     -- Update fires
     for _, fire in ipairs(fires) do
       fire:update(dt)
     end
-    
+
     -- Update steam effects
     for i = #steamEffects, 1, -1 do
       local steam = steamEffects[i]
       steam:update(dt)
-      
+
       -- Remove finished steam effects
       if steam:isDone() then
         table.remove(steamEffects, i)
@@ -80,51 +78,51 @@ function love.update(dt)
       local walls = SelectMenu.getWalls and SelectMenu.getWalls() or {}
       cyclone:update(dt, walls)
     end
-    
+
     -- Check water-fire collisions
     local waterBottles = SelectMenu.getWaterBottles and SelectMenu.getWaterBottles() or {}
     for _, bottle in ipairs(waterBottles) do
       local droplets = bottle:getDroplets()
       -- Track droplets to remove
       local dropletsToRemove = {}
-      
+
       for dropletIndex, droplet in ipairs(droplets) do
         -- Track fires to remove
         local fireHit = false
-        
+
         -- Check collision with each fire
-        for fireIndex = #fires, 1, -1 do  -- Iterate backwards for safe removal
+        for fireIndex = #fires, 1, -1 do -- Iterate backwards for safe removal
           local fire = fires[fireIndex]
           local dx = droplet.x - fire.x
           local dy = droplet.y - (fire.y + (fire.collisionOffsetY or -20))
           local distance = math.sqrt(dx * dx + dy * dy)
-          
+
           -- Simple collision check based on distance
           if distance < (fire.collisionRadius or 40) + droplet.size then
             -- Create steam effect at fire position
-            local steam = SteamEffect:new(fire.x, fire.y, {duration = 3.0})
+            local steam = SteamEffect:new(fire.x, fire.y, { duration = 3.0 })
             table.insert(steamEffects, steam)
-            
+
             -- Destroy the fire
             fire:destroy()
             table.remove(fires, fireIndex)
             fireHit = true
             print(string.format("Fire extinguished at (%.1f, %.1f)!", fire.x, fire.y))
-            
+
             -- Play water evaporation sound
             if SoundManager and SoundManager.playWaterOnFire then
               SoundManager:playWaterOnFire(0.8)
             end
-            break  -- One droplet can only hit one fire
+            break -- One droplet can only hit one fire
           end
         end
-        
+
         -- Mark droplet for removal if it hit a fire
         if fireHit then
           table.insert(dropletsToRemove, dropletIndex)
         end
       end
-      
+
       -- Remove droplets that hit fires (iterate backwards)
       for i = #dropletsToRemove, 1, -1 do
         table.remove(droplets, dropletsToRemove[i])
@@ -136,7 +134,6 @@ end
 function love.draw()
   if CurrentState == GameState.MENU then
     Menu:draw()
-
   elseif CurrentState == GameState.GAME then
     LightWorldManager:draw(function()
       Camera:attach()
@@ -151,7 +148,7 @@ function love.draw()
       for _, fire in ipairs(fires) do
         fire:draw()
       end
-      
+
       -- Draw steam effects
       for _, steam in ipairs(steamEffects) do
         steam:draw()
