@@ -89,6 +89,11 @@ SoundManager.sounds = {
   eagle = {
     eagle = nil
   },
+  chain = {
+    breakHigh = nil,
+    breakLow = nil,
+    layer = nil
+  },
   -- Ambiance & Environmental
   ambiance = {
     nature = nil,
@@ -200,6 +205,11 @@ end
   local assets = "assets/sounds/"
   -- Eagle
   self.sounds.eagle.eagle = love.audio.newSource(assets .. "eagle.mp3", "static")
+  
+  -- Chain sounds
+  self.sounds.chain.breakHigh = love.audio.newSource(assets .. "chain break with high impact.wav", "static")
+  self.sounds.chain.breakLow = love.audio.newSource(assets .. "chain break with low impact.wav", "static")
+  self.sounds.chain.layer = love.audio.newSource(assets .. "chain layer.wav", "static")
 
   -- Ambiance
   self.sounds.ambiance.nature = love.audio.newSource(assets .. "nature ambaince_02.wav", "static")
