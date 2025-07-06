@@ -16,6 +16,7 @@ local Cyclone = require "cyclone"
 local Pit = require "pit"
 local DustEffect = require "dust_effect"
 local FireExtinguishEffect = require "fire_extinguish_effect"
+local Amirani = require "amirani"
 
 local fires = {}
 local cyclone
@@ -23,6 +24,7 @@ local pits = {}
 local dustEffects = {}
 local fireExtinguishEffects = {}
 local steamEffects = {}
+local amirani
 
 local SteamEffect = require "steam_effect"
 local Dog = require "dog"
@@ -78,6 +80,9 @@ function love.load()
   
   -- Create cyclone
   cyclone = Cyclone.new(600, 500)
+  
+  -- Create Amirani (placed at a test location near other elements)
+  amirani = Amirani:new(900, 300)
 end
 
 function love.update(dt)
@@ -89,6 +94,17 @@ function love.update(dt)
     SelectMenu.update(dt)
     LevelManager.CheckCameraMoveTriggers()
     Dog:update(dt)
+    
+    -- Update Amirani
+    if amirani then
+      amirani:update(dt, Dog.x, Dog.y)
+      
+      -- Check if game is won
+      if amirani:isGameWon() then
+        -- Game is won, you could pause updates or transition to a win state
+        return
+      end
+    end
 
     Eagle:update(dt, Dog.x, Dog.y)
     -- Update fires
@@ -255,6 +271,11 @@ function love.draw()
       -- Draw steam effects
       for _, steam in ipairs(steamEffects) do
         steam:draw()
+      end
+      
+      -- Draw Amirani
+      if amirani then
+        amirani:draw()
       end
 
       -- Draw the dog animation on the map
