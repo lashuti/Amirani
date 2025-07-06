@@ -2,6 +2,7 @@ local select_menu = {}
 local waterBottle = require("water_bottle")
 local settings = require("settings")
 local Wall = require("wall")
+local Sand = require("sand")
 
 -- Configuration parameters
 local config = {
@@ -38,6 +39,8 @@ local walls = {}
 local activeWall = nil
 local wallPreview = nil
 local wallRotation = 0
+local sandItems = {}
+local sandPreview = nil
 
 local snapHighlightIndex = nil
 
@@ -64,6 +67,9 @@ function select_menu.load()
     elseif i == 2 then
       itemType = "wall"
       label = "" -- No label for wall
+    elseif i == 3 then
+      itemType = "sand"
+      label = "" -- No label for sand
     end
 
     table.insert(menu, {
@@ -115,6 +121,11 @@ function select_menu.draw()
   -- Draw walls
   for _, wall in ipairs(walls) do
     wall:draw()
+  end
+  
+  -- Draw sand items
+  for _, sand in ipairs(sandItems) do
+    sand:draw()
   end
 
   love.graphics.setColor(config.colorMenuBackground)
@@ -179,6 +190,25 @@ function select_menu.draw()
         love.graphics.rectangle("fill", -40, -10, 80, 4)
 
         love.graphics.pop()
+      elseif item.type == "sand" then
+        -- Draw sand icon
+        love.graphics.push()
+        love.graphics.translate(item.x + item.w / 2, item.y + item.h / 2)
+        love.graphics.scale(0.8, 0.8)
+        
+        -- Sand base
+        love.graphics.setColor(0.76, 0.70, 0.50, 0.9)
+        love.graphics.rectangle("fill", -25, -20, 50, 40, 5)
+        
+        -- Sand pile
+        love.graphics.setColor(0.80, 0.74, 0.54, 0.8)
+        love.graphics.ellipse("fill", 0, 0, 20, 15)
+        
+        -- Highlight
+        love.graphics.setColor(0.85, 0.79, 0.59, 0.5)
+        love.graphics.ellipse("fill", 0, -5, 15, 10)
+        
+        love.graphics.pop()
       end
     end
   end
@@ -207,6 +237,11 @@ function select_menu.draw()
       -- Draw wall preview while dragging
       if wallPreview then
         wallPreview:drawPreview(dragX, dragY, wallRotation, 0.6)
+      end
+    elseif item.type == "sand" then
+      -- Draw sand preview while dragging
+      if sandPreview then
+        sandPreview:drawPreview(dragX, dragY, 0.6)
       end
     else
       love.graphics.setColor(config.colorDraggedItem)
@@ -256,6 +291,8 @@ function select_menu.mousepressed(x, y, button)
         if item.type == "wall" then
           wallPreview = Wall.new(0, 0, math.rad(90))
           wallRotation = math.rad(90) -- Start at 90 degrees (vertical)
+        elseif item.type == "sand" then
+          sandPreview = Sand.new(0, 0)
         end
 
         break
@@ -295,6 +332,11 @@ function select_menu.mousereleased(x, y, button)
           table.insert(walls, wall)
           wallPreview = nil
           wallRotation = math.rad(90) -- Reset to vertical for next pick
+        elseif item.type == "sand" then
+          -- Place sand at mouse position
+          local sand = Sand.new(x, y)
+          table.insert(sandItems, sand)
+          sandPreview = nil
         else
           local px, py = x - dragOffsetX, y - dragOffsetY
           if snapTo then
@@ -313,6 +355,7 @@ function select_menu.mousereleased(x, y, button)
       draggingItem = nil
       snapHighlightIndex = nil
       wallPreview = nil
+      sandPreview = nil
       wallRotation = math.rad(90) -- Reset to vertical
     end
   end
@@ -333,6 +376,11 @@ function select_menu.update(dt)
   -- Update all water bottles
   for _, bottle in ipairs(waterBottles) do
     bottle:update(dt)
+  end
+  
+  -- Update all sand items
+  for _, sand in ipairs(sandItems) do
+    sand:update(dt)
   end
 
   -- Check water droplet collisions with placed items
@@ -416,6 +464,21 @@ end
 -- Get all water bottles (for collision detection)
 function select_menu.getWaterBottles()
   return waterBottles
+end
+
+-- Get all sand items (for collision detection)
+function select_menu.getSandItems()
+  return sandItems
+end
+
+-- Remove a sand item
+function select_menu.removeSandItem(sandToRemove)
+  for i = #sandItems, 1, -1 do
+    if sandItems[i] == sandToRemove then
+      table.remove(sandItems, i)
+      break
+    end
+  end
 end
 
 -- Handle keyboard input for rotation
