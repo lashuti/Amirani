@@ -27,41 +27,35 @@ function love.load()
 end
 
 function love.update(dt)
-
   if CurrentState == GameState.MENU then
-        Menu:update(dt)
-
+    Menu:update(dt)
   elseif CurrentState == GameState.GAME then
-
     Dog:update(dt)
     Light:update(dt)
     LightWorldManager:update(dt)
     SelectMenu.update(dt)
     LevelManager.CheckCameraMoveTriggers()
-
   end
 end
 
 function love.draw()
   if CurrentState == GameState.MENU then
-        Menu:draw()
-
-    elseif CurrentState == GameState.GAME then
-    Map:draw()
-    Dog:draw()
-    Light:draw()
-    SelectMenu.draw()
-    Settings.draw_position()
-
+    Menu:draw()
+  elseif CurrentState == GameState.GAME then
+    -- Draw everything with light_world
     LightWorldManager:draw(function()
       Camera:attach()
-      if BackgroundImage then
-        love.graphics.draw(BackgroundImage, 0, 0, 0, 0.8, 0.8)
-      end
+      Map:draw()
+      Dog:draw()
       Camera:detach()
     end)
+
     -- Draw the old light overlay if enabled (on top of light world)
-    -- Draw select_menu at the bottom (always visible in GAME)
+    Light:draw()
+
+    -- Draw UI elements on top (not affected by lighting)
+    SelectMenu.draw()
+    Settings.draw_position()
   end
 end
 
