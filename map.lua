@@ -94,7 +94,7 @@ function map:draw()
         -- Align the right edge of the map with the right edge of the screen
         local drawX = screenWidth - bgWidth * scaleX
         if drawX > 0 then drawX = 0 end
-        -- Optionally shift down if you want more bottom
+        -- Optionally shift down if you want more bottom ttt
         local yShift = bgHeight * scaleY * 0.17
         local drawY = -yShift
         love.graphics.draw(background, drawX, drawY, 0, scaleX, scaleY)
