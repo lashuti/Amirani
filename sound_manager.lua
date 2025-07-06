@@ -75,7 +75,14 @@ SoundManager.AMIRANI_SOUND = {
   SHOUT_FAR = "shoutFar"
 }
 
+SoundManager.EAGLE = {
+  EAGLE = "eagle"
+}
+
 SoundManager.sounds = {
+  eagle = {
+    eagle = nil
+  },
   -- Ambiance & Environmental
   ambiance = {
     nature = nil,
@@ -161,6 +168,8 @@ SoundManager.musicVolume = 0.8
 function SoundManager:load()
   -- Load all sound files
   local assets = "assets/sounds/"
+  -- Eagle
+  self.sounds.eagle.eagle = love.audio.newSource(assets .. "eagle.mp3", "static")
 
   -- Ambiance
   self.sounds.ambiance.nature = love.audio.newSource(assets .. "nature ambaince_02.wav", "static")
@@ -236,6 +245,19 @@ function SoundManager:load()
   self.sounds.dog.footstep1:setLooping(true)
   self.sounds.dog.footstep2:setLooping(true)
   self.sounds.dog.footstep3:setLooping(true)
+end
+
+function SoundManager:playEagle(volume, pitch)
+  local sound = self.sounds.eagle and self.sounds.eagle.eagle
+  if not sound then
+    print("Warning: Eagle sound not found")
+    return
+  end
+  local source = sound:clone()
+  source:setVolume((volume or 1.0) * self.sfxVolume * self.masterVolume)
+  source:setPitch(pitch or 1.0)
+  source:play()
+  return source
 end
 
 function SoundManager:play(category, soundName, volume, pitch)

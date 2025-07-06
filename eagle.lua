@@ -48,6 +48,9 @@ function Eagle:activate(dogX, dogY)
     self.targetY = dogY
     self.facingLeft = (self.x > dogX)
     self.active = true
+    if SoundManager and SoundManager.playEagle then
+        SoundManager:playEagle(1.0)
+    end
 end
 
 function Eagle:update(dt, dogX, dogY)
