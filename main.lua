@@ -37,6 +37,8 @@ GameState = {
 
 CurrentState = GameState.MENU
 
+
+_G.screamDisable = false
 local menuBgImage
 
 function love.load()
