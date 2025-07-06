@@ -1,6 +1,7 @@
 local select_menu = {}
 local waterBottle = require("water_bottle")
 local settings = require("settings")
+local Wall = require("wall")
 
 -- Configuration parameters
 local config = {
@@ -33,6 +34,10 @@ local dragX, dragY = 0, 0
 local placedItems = {}
 local waterBottles = {}
 local activeBottle = nil
+local walls = {}
+local activeWall = nil
+local wallPreview = nil
+local wallRotation = 0
 
 local snapHighlightIndex = nil
 
@@ -56,6 +61,9 @@ function select_menu.load()
     if i == 1 then
       itemType = "water_bottle"
       label = "" -- No label for water bottle
+    elseif i == 2 then
+      itemType = "wall"
+      label = "" -- No label for wall
     end
 
     table.insert(menu, {
@@ -104,6 +112,11 @@ function select_menu.draw()
     bottle:draw()
   end
 
+  -- Draw walls
+  for _, wall in ipairs(walls) do
+    wall:draw()
+  end
+
   love.graphics.setColor(config.colorMenuBackground)
   love.graphics.rectangle("fill", 0, config.screenHeight - config.menuHeight, config.screenWidth, config.menuHeight)
 
@@ -144,6 +157,28 @@ function select_menu.draw()
         love.graphics.rectangle("fill", -10, -5, 20, 20, 3)
 
         love.graphics.pop()
+      elseif item.type == "wall" then
+        -- Draw wall icon (vertical)
+        love.graphics.push()
+        love.graphics.translate(item.x + item.w / 2, item.y + item.h / 2)
+        love.graphics.rotate(math.rad(90)) -- Show vertical in menu
+        love.graphics.scale(0.4, 0.4)
+
+        -- Wall base
+        love.graphics.setColor(0.5, 0.4, 0.35)
+        love.graphics.rectangle("fill", -40, -10, 80, 20, 2)
+
+        -- Stone pattern
+        love.graphics.setColor(0.4, 0.35, 0.3)
+        for i = -40, 40, 20 do
+          love.graphics.rectangle("line", i, -10, 18, 20, 1)
+        end
+
+        -- Highlight
+        love.graphics.setColor(0.65, 0.55, 0.45, 0.5)
+        love.graphics.rectangle("fill", -40, -10, 80, 4)
+
+        love.graphics.pop()
       end
     end
   end
@@ -168,6 +203,11 @@ function select_menu.draw()
       love.graphics.rectangle("fill", -10, -5, 20, 20, 3)
 
       love.graphics.pop()
+    elseif item.type == "wall" then
+      -- Draw wall preview while dragging
+      if wallPreview then
+        wallPreview:drawPreview(dragX, dragY, wallRotation, 0.6)
+      end
     else
       love.graphics.setColor(config.colorDraggedItem)
       love.graphics.rectangle(
@@ -211,6 +251,13 @@ function select_menu.mousepressed(x, y, button)
         dragOffsetX = item.w / 2 -- Center the drag
         dragOffsetY = item.h / 2
         dragX, dragY = x, y
+
+        -- Create wall preview when dragging wall (start vertical)
+        if item.type == "wall" then
+          wallPreview = Wall.new(0, 0, math.rad(90))
+          wallRotation = math.rad(90) -- Start at 90 degrees (vertical)
+        end
+
         break
       end
     end
@@ -237,6 +284,12 @@ function select_menu.mousereleased(x, y, button)
           end
           local bottle = waterBottle.new(bx, by)
           table.insert(waterBottles, bottle)
+        elseif item.type == "wall" then
+          -- Place wall at mouse position with current rotation
+          local wall = Wall.new(x, y, wallRotation)
+          table.insert(walls, wall)
+          wallPreview = nil
+          wallRotation = math.rad(90) -- Reset to vertical for next pick
         else
           local px, py = x - dragOffsetX, y - dragOffsetY
           if snapTo then
@@ -254,6 +307,8 @@ function select_menu.mousereleased(x, y, button)
       end
       draggingItem = nil
       snapHighlightIndex = nil
+      wallPreview = nil
+      wallRotation = math.rad(90) -- Reset to vertical
     end
   end
 end
@@ -346,6 +401,33 @@ function select_menu.getAllDroplets()
     end
   end
   return allDroplets
+end
+
+-- Get all walls (for external systems like cyclone)
+function select_menu.getWalls()
+  return walls
+end
+
+-- Handle keyboard input for rotation
+function select_menu.keypressed(key)
+  if draggingItem and wallPreview then
+    if key == "a" then
+      -- Rotate counterclockwise
+      wallRotation = wallRotation - math.rad(15)
+    elseif key == "d" then
+      -- Rotate clockwise
+      wallRotation = wallRotation + math.rad(15)
+    elseif key == "r" then
+      -- Reset rotation to vertical
+      wallRotation = math.rad(90)
+    elseif key == "left" then
+      -- Fine rotation counterclockwise
+      wallRotation = wallRotation - math.rad(5)
+    elseif key == "right" then
+      -- Fine rotation clockwise
+      wallRotation = wallRotation + math.rad(5)
+    end
+  end
 end
 
 return select_menu
